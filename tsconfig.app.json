@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noImplicitAny": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": "src",
+    "paths": {
+      "API": ["API/*"],
+      "assets": ["assets/*"],
+      "components": ["components/*"],
+      "hocs": ["hocs/*"],
+      "hooks": ["hooks/*"],
+      "modules": ["modules/*"],
+      "pages": ["pages/*"],
+      "router": ["router/*"],
+      "store": ["store/*"],
+      "styles": ["styles/*"],
+      "types": ["types/*"],
+      "validations": ["validations/*"],
+      "mocks": ["mocks/*"],
+      "tests": ["tests/*"]
+    }
+  },
+  "include": ["src", "./types/types.d.ts", "vite.config.ts", "__mocks__"],
+  "exclude": ["node_modules"]
+}

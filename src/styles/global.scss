@@ -1,0 +1,77 @@
+@use 'styles/mixins.scss' as *;
+
+html {
+  background-color: var(--main-color-3);
+  @include font-text-regular;
+  color: var(--main-color-2-default);
+  margin-right: calc(100% - 100vw);
+}
+
+body {
+  @apply flex flex-col overflow-x-hidden scroll-smooth;
+}
+
+#root {
+  @apply flex grow flex-col;
+}
+
+.page-content {
+  @apply flex grow flex-col justify-center;
+
+  &--scroll-block {
+    overflow: hidden;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+  white-space: nowrap;
+  clip-path: inset(100%);
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+}
+
+.avatar {
+  @apply relative my-auto flex h-14 w-14 min-w-14 cursor-pointer items-center justify-center rounded-full bg-[--accent-color-1-default] text-2xl;
+  .avatar-image {
+    @apply absolute left-0 top-0 rounded-full object-cover;
+    max-width: inherit;
+    width: inherit;
+    height: inherit;
+  }
+}
+
+.text-hint {
+  @apply m-auto select-none text-xl italic;
+}
+
+.online-status-marker {
+  fill: var(--online-status-marker-color);
+  stroke: var(--main-color-5);
+  stroke-width: 3px;
+  transition: var(--base-transition);
+}
+
+#cross {
+  @apply h-[24px] w-[2px] rotate-45 cursor-pointer rounded-lg bg-[var(--main-color-2-default)] opacity-65 hover:opacity-100;
+  &::after {
+    content: '';
+    @apply absolute h-[24px] w-[2px] rotate-90 rounded-lg bg-[var(--main-color-2-default)];
+  }
+}
+
+// only for PC
+@media (hover: hover) {
+  ::-webkit-scrollbar {
+    @apply w-[6px] bg-[var(--main-color-3)];
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-md bg-[var(--accent-color-2-shadow-1)];
+  }
+}
