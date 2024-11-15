@@ -25,6 +25,7 @@
       "hocs": ["hocs/*"],
       "hooks": ["hooks/*"],
       "modules": ["modules/*"],
+      "models": ["models/*"],
       "pages": ["pages/*"],
       "router": ["router/*"],
       "store": ["store/*"],
