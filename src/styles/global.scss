@@ -65,6 +65,61 @@ body {
   }
 }
 
+.app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.board {
+  width: calc(80px * 8);
+  height: calc(80px * 8);
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.cell {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cell img {
+  width: 80px;
+  height: 80px;
+  position: relative;
+}
+
+.white {
+  background-color: var(--cell-light-color);
+}
+
+.black {
+  background-color: var(--cell-dark-color);
+}
+
+.selected {
+  background-color: var(--cell-selected-color);
+}
+
+.available {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background-color: var(--cell-available-color);
+}
+
+.lost {
+  height: calc(50vh - 60px);
+  padding: 30px;
+  margin-left: 50px;
+  background-color: lightgray;
+}
+
 // only for PC
 @media (hover: hover) {
   ::-webkit-scrollbar {
