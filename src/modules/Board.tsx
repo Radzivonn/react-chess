@@ -14,12 +14,18 @@ interface BoardProps {
 const BoardModule: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPlayer }) => {
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
 
+  useEffect(() => {
+    highlightCells();
+  }, [selectedCell]);
+
   const click = (cell: Cell) => {
-    if (selectedCell && selectedCell !== cell && selectedCell.figure?.canMove(cell)) {
+    if (selectedCell && selectedCell !== cell && selectedCell.figure?.canMove(cell, false)) {
       selectedCell.moveFigure(cell);
       swapPlayer();
       setSelectedCell(null);
-      updateBoard();
+      const newBoard = board.getCopyBoard();
+      newBoard.resetIsCellUnderAttackFlags();
+      setBoard(newBoard);
     } else {
       if (cell.figure?.color === currentPlayer?.color) {
         setSelectedCell(cell);
@@ -27,18 +33,12 @@ const BoardModule: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPlaye
     }
   };
 
-  useEffect(() => {
-    highlightCells();
-  }, [selectedCell]);
-
   const highlightCells = () => {
-    board.highlightCells(selectedCell);
-    updateBoard();
-  };
-
-  const updateBoard = () => {
-    const newBoard = board.getCopyBoard();
-    setBoard(newBoard);
+    if (currentPlayer) {
+      board.highlightCells(selectedCell, currentPlayer.color);
+      const newBoard = board.getCopyBoard();
+      setBoard(newBoard);
+    }
   };
 
   return (

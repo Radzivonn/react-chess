@@ -18,10 +18,15 @@ export class Figure {
     this.id = Math.random();
   }
 
-  canMove(target: Cell): boolean {
-    if (target.figure?.color === this.color) return false; // if the attempt is to resemble a square where an allied piece stands
+  canMove(target: Cell, includingYourFigures: boolean): boolean {
+    if (target.figure?.color === this.color && !includingYourFigures) return false; // if the attempt is to resemble a square where an allied piece stands
     if (target.figure?.name === FigureNames.KING) return false;
     return true;
+  }
+
+  // Method for check pawn attacks
+  isCellUnderAttack(target: Cell): boolean {
+    return false;
   }
 
   moveFigure() {}

@@ -9,6 +9,7 @@ export class Cell {
   figure: Figure | null;
   board: Board;
   available: boolean; // Can you move onto a square
+  isUnderAttack: boolean;
   id: number; // For react keys
 
   constructor(board: Board, x: number, y: number, color: Colors, figure: Figure | null) {
@@ -18,6 +19,7 @@ export class Cell {
     this.figure = figure;
     this.board = board;
     this.available = false;
+    this.isUnderAttack = false;
     this.id = Math.random();
   }
 
@@ -79,16 +81,33 @@ export class Cell {
   setFigure(figure: Figure) {
     this.figure = figure;
     this.figure.cell = this;
+    if (figure.color === Colors.BLACK) {
+      const figureIndex = this.board.blackFigures.findIndex((f) => f.id === figure.id);
+      if (figureIndex) this.board.blackFigures[figureIndex] = this.figure;
+    } else {
+      const figureIndex = this.board.whiteFigures.findIndex((f) => f.id === figure.id);
+      if (figureIndex) this.board.whiteFigures[figureIndex] = this.figure;
+    }
   }
 
   addLostFigure(figure: Figure) {
-    if (figure.color === Colors.BLACK) this.board.lostBlackFigures.push(figure);
-    else this.board.lostWhiteFigures.push(figure);
+    if (figure.color === Colors.BLACK) {
+      this.board.lostBlackFigures.push(figure);
+      this.board.blackFigures.splice(
+        this.board.blackFigures.findIndex((f) => f.id === figure.id),
+        1,
+      );
+    } else {
+      this.board.lostWhiteFigures.push(figure);
+      this.board.whiteFigures.splice(
+        this.board.whiteFigures.findIndex((f) => f.id === figure.id),
+        1,
+      );
+    }
   }
 
   moveFigure(target: Cell) {
-    // *** проверка уже была в BoardComponent selectedCell.figure?.canMove
-    if (this.figure && this.figure?.canMove(target)) {
+    if (this.figure) {
       this.figure.moveFigure();
 
       if (target.figure) this.addLostFigure(target.figure);

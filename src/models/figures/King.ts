@@ -11,10 +11,13 @@ export class King extends Figure {
     this.name = FigureNames.KING;
   }
 
-  canMove(target: Cell): boolean {
-    if (!super.canMove(target)) return false;
+  canMove(target: Cell, includingYourFigures: boolean): boolean {
+    if (!super.canMove(target, includingYourFigures) || target.isUnderAttack) return false;
+    // horizontal
     if (this.cell.y === target.y && Math.abs(this.cell.x - target.x) === 1) return true;
+    // vertical
     if (this.cell.x === target.x && Math.abs(this.cell.y - target.y) === 1) return true;
+    // diagonal
     if (Math.abs(this.cell.x - target.x) === 1 && Math.abs(this.cell.y - target.y) === 1) {
       return true;
     }
