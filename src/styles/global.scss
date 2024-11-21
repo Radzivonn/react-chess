@@ -113,6 +113,13 @@ body {
   background-color: var(--cell-available-color);
 }
 
+.under-attack {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background-color: var(--cell-checkered-king-color);
+}
+
 .lost {
   height: calc(50vh - 60px);
   padding: 30px;

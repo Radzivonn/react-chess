@@ -18,6 +18,7 @@ const CellComponent: FC<CellProps> = ({ cell, selected, click }) => {
     >
       {cell.available && !cell.figure && <div className={'available'} />}
       {cell.figure?.logo && <img src={cell.figure.logo} alt="" />}
+      {cell.isUnderAttack && <div className={'under-attack'} />}
     </div>
   );
 };
