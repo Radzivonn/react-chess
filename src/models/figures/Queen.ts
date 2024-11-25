@@ -3,21 +3,22 @@ import { Colors, FigureNames } from 'types/enums';
 import { Cell } from '../Cell';
 import blackLogo from 'assets/black-queen.svg';
 import whiteLogo from 'assets/white-queen.svg';
+import { Board } from 'models/Board';
 
 export class Queen extends Figure {
-  constructor(color: Colors, cell: Cell) {
-    super(color, cell);
+  constructor(x: number, y: number, color: Colors) {
+    super(x, y, color);
     this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
     this.name = FigureNames.QUEEN;
   }
 
-  canMove(target: Cell, includingYourFigures: boolean): boolean {
-    if (!super.canMove(target, includingYourFigures)) return false;
+  canMove(board: Board, target: Cell, includingYourFigures: boolean): boolean {
+    if (!super.canMove(board, target, includingYourFigures)) return false;
 
-    const targetPos = [target.x, target.y] as const;
-    if (this.cell.isEmptyVertical(...targetPos)) return true;
-    if (this.cell.isEmptyHorizontal(...targetPos)) return true;
-    if (this.cell.isEmptyDiagonal(...targetPos)) return true;
+    const positions = [this.x, this.y, target.x, target.y] as const;
+    if (board.isEmptyVertical(...positions)) return true;
+    if (board.isEmptyHorizontal(...positions)) return true;
+    if (board.isEmptyDiagonal(...positions)) return true;
 
     return false;
   }

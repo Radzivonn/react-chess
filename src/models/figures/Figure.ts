@@ -1,26 +1,30 @@
 import { Colors, FigureNames } from 'types/enums';
 import { Cell } from '../Cell';
 import logo from 'assets/black-king.svg';
+import { Board } from 'models/Board';
 
 export class Figure {
-  color: Colors;
+  readonly id: number;
+  readonly color: Colors;
+  x: number;
+  y: number;
   logo: typeof logo | null;
-  cell: Cell;
   name: FigureNames;
-  id: number;
 
-  constructor(color: Colors, cell: Cell) {
+  constructor(x: number, y: number, color: Colors) {
+    this.x = x;
+    this.y = y;
     this.color = color;
-    this.cell = cell;
-    this.cell.figure = this;
     this.logo = null;
     this.name = FigureNames.FIGURE;
     this.id = Math.random();
   }
 
-  canMove(target: Cell, includingYourFigures: boolean): boolean {
+  canMove(board: Board, target: Cell, includingYourFigures = false): boolean {
     if (target.figure?.color === this.color && !includingYourFigures) return false; // if the attempt is to resemble a square where an allied piece stands
-    if (target.figure?.name === FigureNames.KING) return false;
+
+    // if (!this.isPositionSafeAfterMove(target)) return false;
+
     return true;
   }
 

@@ -3,6 +3,7 @@ import CellComponent from 'components/Cell';
 import { Board } from 'models/Board';
 import { Cell } from 'models/Cell';
 import { Player } from 'models/Player';
+import { Colors } from 'types/enums';
 
 interface BoardProps {
   board: Board;
@@ -19,13 +20,17 @@ const BoardModule: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPlaye
   }, [selectedCell]);
 
   const click = (cell: Cell) => {
-    if (selectedCell && selectedCell !== cell && selectedCell.figure?.canMove(cell, false)) {
-      selectedCell.moveFigure(cell);
-      swapPlayer();
-      setSelectedCell(null);
-      const newBoard = board.getCopyBoard();
+    if (selectedCell && selectedCell !== cell && cell.available) {
+      board.moveFigure(selectedCell, cell);
+
+      const nextPlayerColor = currentPlayer?.color === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
+
+      const newBoard = board.getCopyBoard(nextPlayerColor);
       newBoard.resetIsCellUnderAttackFlags();
+
       setBoard(newBoard);
+      setSelectedCell(null);
+      swapPlayer();
     } else {
       if (cell.figure?.color === currentPlayer?.color) {
         setSelectedCell(cell);
@@ -36,7 +41,7 @@ const BoardModule: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPlaye
   const highlightCells = () => {
     if (currentPlayer) {
       board.highlightCells(selectedCell, currentPlayer.color);
-      const newBoard = board.getCopyBoard();
+      const newBoard = board.getCopyBoard(currentPlayer.color);
       setBoard(newBoard);
     }
   };
