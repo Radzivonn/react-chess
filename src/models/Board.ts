@@ -53,27 +53,24 @@ export class Board {
     return newBoard;
   }
 
-  // ! performance fix
-  public highlightCells(selectedCell: Cell | null, playerColor: Colors) {
-    const isKingSelected = selectedCell?.figure?.name === FigureNames.KING;
-
-    if (isKingSelected) {
-      const figures = playerColor === Colors.BLACK ? this.whiteFigures : this.blackFigures;
-      figures.forEach((figure) => {
-        for (let y = 0; y < this.cells.length; y++) {
-          const row = this.cells[y];
-          for (let x = 0; x < row.length; x++) {
-            const target = row[x];
-            if (figure.name === FigureNames.PAWN) {
-              if (figure.isCellUnderAttack(target)) target.isUnderAttack = true;
-            } else if (figure?.canMove(this, target, true) && target.figure?.id !== figure.id) {
-              target.isUnderAttack = true;
-            }
+  countCellsUnderAttack(playerColor: Colors) {
+    const figures = playerColor === Colors.BLACK ? this.whiteFigures : this.blackFigures;
+    figures.forEach((figure) => {
+      for (let y = 0; y < this.cells.length; y++) {
+        const row = this.cells[y];
+        for (let x = 0; x < row.length; x++) {
+          const target = row[x];
+          if (figure.name === FigureNames.PAWN) {
+            if (figure.isCellUnderAttack(target)) target.isUnderAttack = true;
+          } else if (figure?.canMove(this, target, true) && target.figure?.id !== figure.id) {
+            target.isUnderAttack = true;
           }
         }
-      });
-    }
+      }
+    });
+  }
 
+  countAvailableCells(selectedCell: Cell | null, isKingSelected: boolean) {
     for (let y = 0; y < this.cells.length; y++) {
       const row = this.cells[y];
       for (let x = 0; x < row.length; x++) {
@@ -86,6 +83,15 @@ export class Board {
         }
       }
     }
+  }
+
+  // ! performance fix
+  public highlightCells(selectedCell: Cell | null, playerColor: Colors) {
+    const isKingSelected = selectedCell?.figure?.name === FigureNames.KING;
+
+    if (isKingSelected) this.countCellsUnderAttack(playerColor);
+
+    this.countAvailableCells(selectedCell, isKingSelected);
   }
 
   public getCell(x: number, y: number) {
