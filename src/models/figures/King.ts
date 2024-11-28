@@ -12,7 +12,7 @@ export class King extends Figure {
     this.name = FigureNames.KING;
   }
 
-  canMove(board: Board, target: Cell, includingYourFigures: boolean): boolean {
+  canMove(board: Board, target: Cell, includingYourFigures = false): boolean {
     if (!super.canMove(board, target, includingYourFigures) || target.isUnderAttack) return false;
     // horizontal
     if (this.y === target.y && Math.abs(this.x - target.x) === 1) return true;

@@ -12,7 +12,7 @@ export class Rook extends Figure {
     this.name = FigureNames.ROOK;
   }
 
-  canMove(board: Board, target: Cell, includingYourFigures: boolean): boolean {
+  canMove(board: Board, target: Cell, includingYourFigures = false): boolean {
     if (!super.canMove(board, target, includingYourFigures)) return false;
 
     const targetPos = [this.x, this.y, target.x, target.y] as const;

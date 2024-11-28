@@ -17,7 +17,7 @@ export class Pawn extends Figure {
     this.name = FigureNames.PAWN;
   }
 
-  canMove(board: Board, target: Cell, includingYourFigures: boolean): boolean {
+  canMove(board: Board, target: Cell, includingYourFigures = false): boolean {
     if (!super.canMove(board, target, includingYourFigures)) return false;
 
     const direction: Direction = this.color === Colors.BLACK ? 1 : -1; // TODO temporary decision

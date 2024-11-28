@@ -20,10 +20,10 @@ const BoardModule: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPlaye
   }, [selectedCell]);
 
   const click = (cell: Cell) => {
-    if (selectedCell && selectedCell !== cell && cell.available) {
+    if (currentPlayer && selectedCell && selectedCell !== cell && cell.available) {
       board.moveFigure(selectedCell, cell);
 
-      const nextPlayerColor = currentPlayer?.color === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
+      const nextPlayerColor = currentPlayer.color === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
 
       const newBoard = board.getCopyBoard(nextPlayerColor);
       newBoard.resetIsCellUnderAttackFlags();

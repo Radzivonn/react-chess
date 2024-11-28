@@ -12,7 +12,7 @@ export class Knight extends Figure {
     this.name = FigureNames.KNIGHT;
   }
 
-  canMove(board: Board, target: Cell, includingYourFigures: boolean): boolean {
+  canMove(board: Board, target: Cell, includingYourFigures = false): boolean {
     if (!super.canMove(board, target, includingYourFigures)) return false;
     const dx = Math.abs(this.x - target.x);
     const dy = Math.abs(this.y - target.y);
