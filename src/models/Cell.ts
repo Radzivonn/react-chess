@@ -1,4 +1,4 @@
-import { Colors, FigureNames } from 'types/enums';
+import { Colors } from 'types/enums';
 import { Figure } from './figures/Figure';
 
 export class Cell {
@@ -8,7 +8,6 @@ export class Cell {
   readonly y: number;
   figure: Figure | null;
   available: boolean; // Can you move onto a square
-  isUnderAttack: boolean;
 
   constructor(x: number, y: number, color: Colors, figure: Figure | null) {
     this.x = x;
@@ -16,15 +15,11 @@ export class Cell {
     this.color = color;
     this.figure = figure;
     this.available = false;
-    this.isUnderAttack = false;
     this.id = Math.random();
   }
 
-  isEmpty(playerColor: Colors): boolean {
-    return (
-      this.figure === null ||
-      (this.figure.name === FigureNames.KING && this.figure.color === playerColor)
-    );
+  isEmpty(): boolean {
+    return this.figure === null;
   }
 
   isEnemy(target: Cell): boolean {
