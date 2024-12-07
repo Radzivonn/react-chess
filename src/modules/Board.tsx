@@ -3,7 +3,7 @@ import CellComponent from 'components/Cell';
 import { Board } from 'models/Board';
 import { Cell } from 'models/Cell';
 import { Player } from 'models/Player';
-import { Colors } from 'types/enums';
+import { Colors, FigureNames } from 'types/enums';
 
 interface BoardProps {
   board: Board;
@@ -25,8 +25,11 @@ const BoardModule: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPlaye
 
       const nextPlayerColor = currentPlayer.color === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
 
-      const newBoard = board.getCopyBoard(nextPlayerColor);
-      newBoard.resetIsCellUnderAttackFlags();
+      const opponentFigures =
+        nextPlayerColor === Colors.BLACK ? board.whiteFigures : board.blackFigures;
+
+      const newBoard = board.getCopyBoard(nextPlayerColor, board.isInCheck(opponentFigures));
+      newBoard.resetCellAvailabilityFlags();
 
       setBoard(newBoard);
       setSelectedCell(null);
@@ -39,9 +42,9 @@ const BoardModule: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPlaye
   };
 
   const highlightCells = () => {
-    if (currentPlayer) {
-      board.highlightCells(selectedCell, currentPlayer.color);
-      const newBoard = board.getCopyBoard(currentPlayer.color);
+    if (currentPlayer && selectedCell) {
+      board.highlightCells(selectedCell);
+      const newBoard = board.getCopyBoard(currentPlayer.color, board.checkState);
       setBoard(newBoard);
     }
   };
@@ -58,6 +61,11 @@ const BoardModule: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPlaye
                 cell={cell}
                 key={cell.id}
                 selected={cell.x === selectedCell?.x && cell.y === selectedCell?.y}
+                checkState={
+                  cell.figure?.color === board.currentPlayerColor &&
+                  cell.figure.name === FigureNames.KING &&
+                  board.checkState
+                }
               />
             ))}
           </React.Fragment>

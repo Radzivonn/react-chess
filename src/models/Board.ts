@@ -10,6 +10,7 @@ import { Figure } from './figures/Figure';
 
 export class Board {
   currentPlayerColor = Colors.WHITE;
+  checkState = false;
   cells: Cell[][] = [];
   blackFigures: Figure[] = [];
   whiteFigures: Figure[] = [];
@@ -21,29 +22,34 @@ export class Board {
       const row: Cell[] = [];
       for (let x = 0; x < 8; x++) {
         if ((x + y) % 2 !== 0) {
-          row.push(new Cell(x, y, Colors.BLACK, null)); // Black cells
+          row.push(new Cell(x, y, Colors.BLACK, null));
         } else {
-          row.push(new Cell(x, y, Colors.WHITE, null)); // White cells
+          row.push(new Cell(x, y, Colors.WHITE, null));
         }
       }
       this.cells.push(row);
     }
   }
 
-  public resetIsCellUnderAttackFlags(): void {
+  public getCell(x: number, y: number) {
+    return this.cells[y][x];
+  }
+
+  public resetCellAvailabilityFlags(): void {
     for (let y = 0; y < this.cells.length; y++) {
       const row = this.cells[y];
       for (let x = 0; x < row.length; x++) {
         const target = row[x];
-        target.isUnderAttack = false;
+        target.available = false;
       }
     }
   }
 
-  public getCopyBoard(playerColor: Colors): Board {
+  public getCopyBoard(playerColor: Colors, checkState: boolean): Board {
     const newBoard = new Board();
     /* заменить на глубокое копирование объекта */
     newBoard.currentPlayerColor = playerColor;
+    newBoard.checkState = checkState;
     newBoard.cells = this.cells;
     newBoard.lostWhiteFigures = this.lostWhiteFigures;
     newBoard.lostBlackFigures = this.lostBlackFigures;
@@ -53,103 +59,68 @@ export class Board {
     return newBoard;
   }
 
-  countCellsUnderAttack(playerColor: Colors) {
-    const figures = playerColor === Colors.BLACK ? this.whiteFigures : this.blackFigures;
-    figures.forEach((figure) => {
+  isInCheck(opponentFigures: Figure[]) {
+    for (const figure of opponentFigures) {
+      const isPawn = figure.name === FigureNames.PAWN;
       for (let y = 0; y < this.cells.length; y++) {
         const row = this.cells[y];
         for (let x = 0; x < row.length; x++) {
           const target = row[x];
-          if (figure.name === FigureNames.PAWN) {
-            if (figure.isCellUnderAttack(target)) target.isUnderAttack = true;
-          } else if (figure?.canMove(this, target, true) && target.figure?.id !== figure.id) {
-            target.isUnderAttack = true;
+          const isKingTarget =
+            target.figure?.color !== figure.color && target.figure?.name === FigureNames.KING;
+
+          if (isKingTarget && isPawn && figure.isCellUnderAttack(target)) {
+            return true;
+          } else if (isKingTarget && !isPawn && figure.canMove(this, target)) {
+            return true;
           }
         }
       }
-    });
+    }
+    return false;
   }
 
-  countAvailableCells(selectedCell: Cell | null, isKingSelected: boolean) {
+  isPositionSafeAfterMove(currentCell: Cell, targetCell: Cell) {
+    if (!currentCell.figure) return false;
+
+    const currentFigureClone = currentCell.figure.clone();
+    const targetFigureClone = targetCell.figure ? targetCell.figure.clone() : null;
+
+    currentCell.figure.x = targetCell.x;
+    currentCell.figure.y = targetCell.y;
+
+    this.cells[targetCell.y][targetCell.x].figure = currentCell.figure;
+    this.cells[currentCell.y][currentCell.x].figure = null;
+
+    let opponentFigures =
+      this.currentPlayerColor === Colors.BLACK ? this.whiteFigures : this.blackFigures;
+    opponentFigures = opponentFigures.filter((f) => f.id !== targetFigureClone?.id); // exclude the captured piece in case of a move
+
+    const isInCheck = this.isInCheck(opponentFigures);
+
+    this.cells[currentCell.y][currentCell.x].figure = currentFigureClone;
+    this.cells[targetCell.y][targetCell.x].figure = targetFigureClone;
+
+    return !isInCheck;
+  }
+
+  countAvailableCells(selectedCell: Cell) {
     for (let y = 0; y < this.cells.length; y++) {
       const row = this.cells[y];
       for (let x = 0; x < row.length; x++) {
         const target = row[x];
+        let isPositionSafeAfterMove = false;
         const isFigureCanMove = !!selectedCell?.figure?.canMove(this, target);
-        if (isKingSelected) {
-          target.available = isFigureCanMove && !target.isUnderAttack;
-        } else {
-          target.available = isFigureCanMove;
+        if (isFigureCanMove) {
+          isPositionSafeAfterMove = this.isPositionSafeAfterMove(selectedCell, target);
         }
+        target.available = isFigureCanMove && isPositionSafeAfterMove;
       }
     }
   }
 
-  // ! performance fix
-  public highlightCells(selectedCell: Cell | null, playerColor: Colors) {
-    const isKingSelected = selectedCell?.figure?.name === FigureNames.KING;
-
-    if (isKingSelected) this.countCellsUnderAttack(playerColor);
-
-    this.countAvailableCells(selectedCell, isKingSelected);
-  }
-
-  public getCell(x: number, y: number) {
-    return this.cells[y][x];
-  }
-
-  isEmptyVertical(currentX: number, currentY: number, targetX: number, targetY: number): boolean {
-    if (currentX !== targetX) {
-      return false;
-    }
-
-    const min = Math.min(currentY, targetY);
-    const max = Math.max(currentY, targetY);
-    for (let y = min + 1; y < max; y++) {
-      if (!this.getCell(currentX, y).isEmpty(this.currentPlayerColor)) return false;
-    }
-    return true;
-  }
-
-  isEmptyHorizontal(currentX: number, currentY: number, targetX: number, targetY: number): boolean {
-    if (currentY !== targetY) {
-      return false;
-    }
-
-    const min = Math.min(currentX, targetX);
-    const max = Math.max(currentX, targetX);
-    for (let x = min + 1; x < max; x++) {
-      if (!this.getCell(x, currentY).isEmpty(this.currentPlayerColor)) return false;
-    }
-    return true;
-  }
-
-  isEmptyDiagonal(currentX: number, currentY: number, targetX: number, targetY: number): boolean {
-    const absX = Math.abs(targetX - currentX);
-    const absY = Math.abs(targetY - currentY);
-    if (absY !== absX) return false;
-
-    const dy = currentY < targetY ? 1 : -1;
-    const dx = currentX < targetX ? 1 : -1;
-
-    for (let i = 1; i < absY; i++) {
-      if (!this.getCell(currentX + dx * i, currentY + dy * i).isEmpty(this.currentPlayerColor)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  setFigure(target: Cell, figure: Figure) {
-    target.figure = figure;
-
-    if (figure.color === Colors.BLACK) {
-      const figureIndex = this.blackFigures.findIndex((f) => f.id === figure.id);
-      if (figureIndex) this.blackFigures[figureIndex] = target.figure;
-    } else {
-      const figureIndex = this.whiteFigures.findIndex((f) => f.id === figure.id);
-      if (figureIndex) this.whiteFigures[figureIndex] = target.figure;
-    }
+  public highlightCells(selectedCell: Cell) {
+    if (selectedCell.figure) this.countAvailableCells(selectedCell);
   }
 
   addLostFigure(figure: Figure) {
@@ -169,27 +140,78 @@ export class Board {
   }
 
   moveFigure(currentCell: Cell, target: Cell) {
-    if (currentCell.figure) {
-      currentCell.figure.moveFigure();
+    const currentFigure = currentCell.figure;
+    if (currentFigure) {
+      currentFigure.moveFigure();
 
-      if (target.figure) this.addLostFigure(target.figure);
+      if (target.figure) this.addLostFigure(target.figure.clone());
 
-      currentCell.figure.x = target.x;
-      currentCell.figure.y = target.y;
+      currentFigure.x = target.x;
+      currentFigure.y = target.y;
 
-      this.setFigure(target, currentCell.figure);
+      target.figure = currentFigure.clone();
+
+      if (currentFigure.color === Colors.BLACK) {
+        const figureIndex = this.blackFigures.findIndex((f) => f.id === currentFigure.id);
+        if (figureIndex) this.blackFigures[figureIndex] = target.figure;
+      } else {
+        const figureIndex = this.whiteFigures.findIndex((f) => f.id === currentFigure.id);
+        if (figureIndex) this.whiteFigures[figureIndex] = target.figure;
+      }
 
       currentCell.figure = null;
     }
   }
 
+  isEmptyVertical(currentX: number, currentY: number, targetX: number, targetY: number): boolean {
+    if (currentX !== targetX) {
+      return false;
+    }
+
+    const min = Math.min(currentY, targetY);
+    const max = Math.max(currentY, targetY);
+    for (let y = min + 1; y < max; y++) {
+      if (!this.getCell(currentX, y).isEmpty()) return false;
+    }
+    return true;
+  }
+
+  isEmptyHorizontal(currentX: number, currentY: number, targetX: number, targetY: number): boolean {
+    if (currentY !== targetY) {
+      return false;
+    }
+
+    const min = Math.min(currentX, targetX);
+    const max = Math.max(currentX, targetX);
+    for (let x = min + 1; x < max; x++) {
+      if (!this.getCell(x, currentY).isEmpty()) return false;
+    }
+    return true;
+  }
+
+  isEmptyDiagonal(currentX: number, currentY: number, targetX: number, targetY: number): boolean {
+    const absX = Math.abs(targetX - currentX);
+    const absY = Math.abs(targetY - currentY);
+    if (absY !== absX) return false;
+
+    const dy = currentY < targetY ? 1 : -1;
+    const dx = currentX < targetX ? 1 : -1;
+
+    for (let i = 1; i < absY; i++) {
+      if (!this.getCell(currentX + dx * i, currentY + dy * i).isEmpty()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   private addPawns() {
     for (let i = 0; i < 8; i++) {
-      const blackPawn = new Pawn(i, 1, Colors.BLACK);
+      const blackPawn = new Pawn(i, 1, Colors.BLACK, true);
       this.cells[1][i].figure = blackPawn;
       this.blackFigures.push(blackPawn);
 
-      const whitePawn = new Pawn(i, 6, Colors.WHITE);
+      const whitePawn = new Pawn(i, 6, Colors.WHITE, true);
       this.cells[6][i].figure = whitePawn;
       this.whiteFigures.push(whitePawn);
     }
