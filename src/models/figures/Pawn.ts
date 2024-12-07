@@ -9,16 +9,17 @@ type Direction = 1 | -1;
 type FirstStepDirection = 2 | -2;
 
 export class Pawn extends Figure {
-  isFirstStep: boolean = true;
+  isFirstStep: boolean;
 
-  constructor(x: number, y: number, color: Colors) {
-    super(x, y, color);
+  constructor(x: number, y: number, color: Colors, isFirstStep: boolean, id?: number) {
+    super(x, y, color, id);
     this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
     this.name = FigureNames.PAWN;
+    this.isFirstStep = isFirstStep;
   }
 
-  canMove(board: Board, target: Cell, includingYourFigures = false): boolean {
-    if (!super.canMove(board, target, includingYourFigures)) return false;
+  canMove(board: Board, target: Cell): boolean {
+    if (!super.canMove(board, target)) return false;
 
     const direction: Direction = this.color === Colors.BLACK ? 1 : -1; // TODO temporary decision
     const firstStepDirection: FirstStepDirection = this.color === Colors.BLACK ? 2 : -2;
@@ -29,16 +30,13 @@ export class Pawn extends Figure {
       if (
         this.isFirstStep &&
         target.y === this.y + firstStepDirection &&
-        target.isEmpty(board.currentPlayerColor) &&
-        board.getCell(target.x, target.y - direction).isEmpty(board.currentPlayerColor)
+        target.isEmpty() &&
+        board.getCell(target.x, target.y - direction).isEmpty()
       ) {
         return true;
       }
 
-      if (
-        target.y === this.y + direction &&
-        board.getCell(target.x, target.y).isEmpty(board.currentPlayerColor)
-      ) {
+      if (target.y === this.y + direction && board.getCell(target.x, target.y).isEmpty()) {
         return true;
       }
     }
@@ -63,5 +61,9 @@ export class Pawn extends Figure {
   // added moveFigure function for the pawn to track the first move
   moveFigure() {
     this.isFirstStep = false;
+  }
+
+  clone() {
+    return new Pawn(this.x, this.y, this.color, this.isFirstStep, this.id);
   }
 }

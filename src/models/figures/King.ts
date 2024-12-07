@@ -6,14 +6,14 @@ import blackLogo from 'assets/black-king.svg';
 import whiteLogo from 'assets/white-king.svg';
 
 export class King extends Figure {
-  constructor(x: number, y: number, color: Colors) {
-    super(x, y, color);
+  constructor(x: number, y: number, color: Colors, id?: number) {
+    super(x, y, color, id);
     this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
     this.name = FigureNames.KING;
   }
 
-  canMove(board: Board, target: Cell, includingYourFigures = false): boolean {
-    if (!super.canMove(board, target, includingYourFigures) || target.isUnderAttack) return false;
+  canMove(board: Board, target: Cell): boolean {
+    if (!super.canMove(board, target)) return false;
     // horizontal
     if (this.y === target.y && Math.abs(this.x - target.x) === 1) return true;
     // vertical
@@ -23,5 +23,9 @@ export class King extends Figure {
       return true;
     }
     return false;
+  }
+
+  clone() {
+    return new King(this.x, this.y, this.color, this.id);
   }
 }

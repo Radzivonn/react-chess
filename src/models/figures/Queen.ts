@@ -6,14 +6,14 @@ import whiteLogo from 'assets/white-queen.svg';
 import { Board } from 'models/Board';
 
 export class Queen extends Figure {
-  constructor(x: number, y: number, color: Colors) {
-    super(x, y, color);
+  constructor(x: number, y: number, color: Colors, id?: number) {
+    super(x, y, color, id);
     this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
     this.name = FigureNames.QUEEN;
   }
 
-  canMove(board: Board, target: Cell, includingYourFigures = false): boolean {
-    if (!super.canMove(board, target, includingYourFigures)) return false;
+  canMove(board: Board, target: Cell): boolean {
+    if (!super.canMove(board, target)) return false;
 
     const positions = [this.x, this.y, target.x, target.y] as const;
     if (board.isEmptyVertical(...positions)) return true;
@@ -21,5 +21,9 @@ export class Queen extends Figure {
     if (board.isEmptyDiagonal(...positions)) return true;
 
     return false;
+  }
+
+  clone() {
+    return new Queen(this.x, this.y, this.color, this.id);
   }
 }
