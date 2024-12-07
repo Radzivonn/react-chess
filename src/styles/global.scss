@@ -102,8 +102,18 @@ body {
   background-color: var(--cell-dark-color);
 }
 
+.in-check {
+  background: radial-gradient(var(--cell-checkered-king-color) 43%, var(--cell-light-color) 85%);
+}
+
 .selected {
   background-color: var(--cell-selected-color);
+  &.in-check {
+    background: radial-gradient(
+      var(--cell-checkered-king-color) 43%,
+      var(--cell-selected-color) 85%
+    );
+  }
 }
 
 .available {
@@ -111,13 +121,6 @@ body {
   width: 16px;
   border-radius: 50%;
   background-color: var(--cell-available-color);
-}
-
-.under-attack {
-  height: 16px;
-  width: 16px;
-  border-radius: 50%;
-  background-color: var(--cell-checkered-king-color);
 }
 
 .lost {
