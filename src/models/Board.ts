@@ -61,6 +61,21 @@ export class Board {
     return newBoard;
   }
 
+  isCheckMate() {
+    if (this.checkState) {
+      for (let y = 0; y < this.cells.length; y++) {
+        const row = this.cells[y];
+        for (let x = 0; x < row.length; x++) {
+          const target = row[x];
+          if (target.figure?.color === this.currentPlayerColor && this.countAvailableCells(target))
+            return false;
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
   isInCheck(opponentFigures: Figure[]) {
     for (const figure of opponentFigures) {
       const isPawn = figure.name === FigureNames.PAWN;
@@ -107,6 +122,7 @@ export class Board {
   }
 
   countAvailableCells(selectedCell: Cell) {
+    let hasAvailableCells = false;
     for (let y = 0; y < this.cells.length; y++) {
       const row = this.cells[y];
       for (let x = 0; x < row.length; x++) {
@@ -116,9 +132,13 @@ export class Board {
         if (isFigureCanMove) {
           isPositionSafeAfterMove = this.isPositionSafeAfterMove(selectedCell, target);
         }
-        target.available = isFigureCanMove && isPositionSafeAfterMove;
+        if (isFigureCanMove && isPositionSafeAfterMove) {
+          target.available = true;
+          hasAvailableCells = true;
+        }
       }
     }
+    return hasAvailableCells;
   }
 
   public highlightCells(selectedCell: Cell) {

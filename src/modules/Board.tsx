@@ -10,9 +10,16 @@ interface BoardProps {
   setBoard: (board: Board) => void;
   currentPlayer: Player | null;
   swapPlayer: () => void;
+  setIsCheckMate: (isCheckMate: boolean) => void;
 }
 
-const BoardModule: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPlayer }) => {
+const BoardModule: FC<BoardProps> = ({
+  board,
+  setBoard,
+  currentPlayer,
+  swapPlayer,
+  setIsCheckMate,
+}) => {
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
 
   useEffect(() => {
@@ -26,15 +33,15 @@ const BoardModule: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPlaye
       const nextPlayerColor = currentPlayer.color === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
 
       const newBoard = board.getCopyBoard(nextPlayerColor);
+      if (newBoard.checkState && newBoard.isCheckMate()) setIsCheckMate(true);
       newBoard.resetCellAvailabilityFlags();
 
       setBoard(newBoard);
       setSelectedCell(null);
       swapPlayer();
-    } else {
-      if (cell.figure?.color === currentPlayer?.color) {
-        setSelectedCell(cell);
-      }
+    } else if (cell.figure?.color === currentPlayer?.color) {
+      setSelectedCell(cell);
+      board.resetCellAvailabilityFlags();
     }
   };
 

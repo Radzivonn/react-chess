@@ -132,6 +132,30 @@ body {
   background-color: lightgray;
 }
 
+.winner-message-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(14, 14, 14, 0.4);
+}
+
+.winner-message {
+  position: absolute;
+  z-index: 1000;
+  background-color: var(--main-color-3);
+  border-radius: 8px;
+  font-size: 32px;
+  color: white;
+  text-transform: capitalize;
+  padding: 8px 12px;
+}
+
 // only for PC
 @media (hover: hover) {
   ::-webkit-scrollbar {
