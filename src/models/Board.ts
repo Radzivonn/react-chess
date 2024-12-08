@@ -45,11 +45,13 @@ export class Board {
     }
   }
 
-  public getCopyBoard(playerColor: Colors, checkState: boolean): Board {
+  public getCopyBoard(playerColor: Colors): Board {
+    const opponentFigures = playerColor === Colors.BLACK ? this.whiteFigures : this.blackFigures;
+
     const newBoard = new Board();
     /* заменить на глубокое копирование объекта */
     newBoard.currentPlayerColor = playerColor;
-    newBoard.checkState = checkState;
+    newBoard.checkState = this.isInCheck(opponentFigures);
     newBoard.cells = this.cells;
     newBoard.lostWhiteFigures = this.lostWhiteFigures;
     newBoard.lostBlackFigures = this.lostBlackFigures;

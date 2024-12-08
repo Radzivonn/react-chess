@@ -25,10 +25,7 @@ const BoardModule: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPlaye
 
       const nextPlayerColor = currentPlayer.color === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
 
-      const opponentFigures =
-        nextPlayerColor === Colors.BLACK ? board.whiteFigures : board.blackFigures;
-
-      const newBoard = board.getCopyBoard(nextPlayerColor, board.isInCheck(opponentFigures));
+      const newBoard = board.getCopyBoard(nextPlayerColor);
       newBoard.resetCellAvailabilityFlags();
 
       setBoard(newBoard);
@@ -44,7 +41,7 @@ const BoardModule: FC<BoardProps> = ({ board, setBoard, currentPlayer, swapPlaye
   const highlightCells = () => {
     if (currentPlayer && selectedCell) {
       board.highlightCells(selectedCell);
-      const newBoard = board.getCopyBoard(currentPlayer.color, board.checkState);
+      const newBoard = board.getCopyBoard(currentPlayer.color);
       setBoard(newBoard);
     }
   };

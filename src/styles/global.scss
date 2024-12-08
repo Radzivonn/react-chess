@@ -96,14 +96,16 @@ body {
 
 .white {
   background-color: var(--cell-light-color);
+  &.in-check {
+    background: radial-gradient(var(--cell-checkered-king-color) 43%, var(--cell-light-color) 85%);
+  }
 }
 
 .black {
   background-color: var(--cell-dark-color);
-}
-
-.in-check {
-  background: radial-gradient(var(--cell-checkered-king-color) 43%, var(--cell-light-color) 85%);
+  &.in-check {
+    background: radial-gradient(var(--cell-checkered-king-color) 43%, var(--cell-dark-color) 85%);
+  }
 }
 
 .selected {
