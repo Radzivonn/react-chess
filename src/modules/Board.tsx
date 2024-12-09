@@ -11,6 +11,7 @@ interface BoardProps {
   currentPlayer: Player | null;
   swapPlayer: () => void;
   setIsCheckMate: (isCheckMate: boolean) => void;
+  setIsStalemate: (IsStalemate: boolean) => void;
 }
 
 const BoardModule: FC<BoardProps> = ({
@@ -19,6 +20,7 @@ const BoardModule: FC<BoardProps> = ({
   currentPlayer,
   swapPlayer,
   setIsCheckMate,
+  setIsStalemate,
 }) => {
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
 
@@ -31,9 +33,14 @@ const BoardModule: FC<BoardProps> = ({
       board.moveFigure(selectedCell, cell);
 
       const nextPlayerColor = currentPlayer.color === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
+      const opponentFigures =
+        nextPlayerColor === Colors.BLACK ? board.whiteFigures : board.blackFigures;
 
-      const newBoard = board.getCopyBoard(nextPlayerColor);
-      if (newBoard.checkState && newBoard.isCheckMate()) setIsCheckMate(true);
+      const newBoard = board.getCopyBoard(nextPlayerColor, board.isInCheck(opponentFigures));
+
+      if (newBoard.isCheckMate()) setIsCheckMate(true);
+      if (newBoard.isStalemate()) setIsStalemate(true);
+
       newBoard.resetCellAvailabilityFlags();
 
       setBoard(newBoard);
@@ -48,7 +55,7 @@ const BoardModule: FC<BoardProps> = ({
   const highlightCells = () => {
     if (currentPlayer && selectedCell) {
       board.highlightCells(selectedCell);
-      const newBoard = board.getCopyBoard(currentPlayer.color);
+      const newBoard = board.getCopyBoard(currentPlayer.color, board.checkState);
       setBoard(newBoard);
     }
   };

@@ -7,6 +7,7 @@ import BoardModule from 'modules/Board';
 import LostFigures from 'modules/LostFigures';
 import Timer from 'modules/Timer';
 import { WinnerMessage } from 'components/WinnerMessage';
+import { StalemateMessage } from 'components/StalemateMessage';
 
 const App = () => {
   const [board, setBoard] = useState(new Board());
@@ -14,6 +15,7 @@ const App = () => {
   const [blackPlayer] = useState(new Player(Colors.BLACK));
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [isCheckMate, setIsCheckMate] = useState(false);
+  const [isStalemate, setIsStalemate] = useState(false);
 
   useEffect(() => {
     restart();
@@ -26,6 +28,7 @@ const App = () => {
     setBoard(newBoard);
     setCurrentPlayer(whitePlayer);
     setIsCheckMate(false);
+    setIsStalemate(false);
   };
 
   const swapPlayer = () => {
@@ -44,12 +47,14 @@ const App = () => {
         currentPlayer={currentPlayer}
         swapPlayer={swapPlayer}
         setIsCheckMate={setIsCheckMate}
+        setIsStalemate={setIsStalemate}
       />
       <div>
         <LostFigures title="Black pieces" figures={board.lostBlackFigures} />
         <LostFigures title="White pieces" figures={board.lostWhiteFigures} />
       </div>
       {isCheckMate && <WinnerMessage winnerColor={getWinnerColor()} />}
+      {isStalemate && <StalemateMessage />}
     </div>
   );
 };

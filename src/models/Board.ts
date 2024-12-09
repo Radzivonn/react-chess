@@ -45,13 +45,11 @@ export class Board {
     }
   }
 
-  public getCopyBoard(playerColor: Colors): Board {
-    const opponentFigures = playerColor === Colors.BLACK ? this.whiteFigures : this.blackFigures;
-
+  public getCopyBoard(playerColor: Colors, checkState: boolean): Board {
     const newBoard = new Board();
     /* заменить на глубокое копирование объекта */
     newBoard.currentPlayerColor = playerColor;
-    newBoard.checkState = this.isInCheck(opponentFigures);
+    newBoard.checkState = checkState;
     newBoard.cells = this.cells;
     newBoard.lostWhiteFigures = this.lostWhiteFigures;
     newBoard.lostBlackFigures = this.lostBlackFigures;
@@ -59,6 +57,21 @@ export class Board {
     newBoard.whiteFigures = this.whiteFigures;
     /* заменить на глубокое копирование объекта */
     return newBoard;
+  }
+
+  isStalemate() {
+    if (!this.checkState) {
+      for (let y = 0; y < this.cells.length; y++) {
+        const row = this.cells[y];
+        for (let x = 0; x < row.length; x++) {
+          const target = row[x];
+          if (target.figure?.color === this.currentPlayerColor && this.countAvailableCells(target))
+            return false;
+        }
+      }
+      return true;
+    }
+    return false;
   }
 
   isCheckMate() {
@@ -74,6 +87,22 @@ export class Board {
       return true;
     }
     return false;
+  }
+
+  private replaceFigures(figure: Figure) {
+    if (figure.color === Colors.BLACK) {
+      this.blackFigures.splice(
+        this.blackFigures.findIndex((f) => f.id === figure.id),
+        1,
+        figure,
+      );
+    } else {
+      this.whiteFigures.splice(
+        this.whiteFigures.findIndex((f) => f.id === figure.id),
+        1,
+        figure,
+      );
+    }
   }
 
   isInCheck(opponentFigures: Figure[]) {
@@ -117,6 +146,9 @@ export class Board {
 
     this.cells[currentCell.y][currentCell.x].figure = currentFigureClone;
     this.cells[targetCell.y][targetCell.x].figure = targetFigureClone;
+
+    this.replaceFigures(currentFigureClone);
+    if (targetFigureClone) this.replaceFigures(targetFigureClone);
 
     return !isInCheck;
   }

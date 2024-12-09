@@ -7,8 +7,8 @@ interface Props {
 
 export const WinnerMessage: FC<Props> = ({ winnerColor }) => {
   return (
-    <div className="winner-message-bg">
-      <div className="winner-message"> {winnerColor} won! </div>
+    <div className="message-bg">
+      <div className="message"> {winnerColor} won! </div>
     </div>
   );
 };
