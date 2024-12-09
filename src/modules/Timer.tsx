@@ -3,28 +3,40 @@ import { Player } from 'models/Player';
 import { Colors } from 'types/enums';
 
 interface TimerProps {
+  isStopped: boolean;
   currentPlayer: Player | null;
   restart: () => void;
 }
 
 const GAME_TIME = 600; // (10 minutes) in seconds
 
-const Timer: FC<TimerProps> = ({ currentPlayer, restart }) => {
+const Timer: FC<TimerProps> = ({ isStopped, currentPlayer, restart }) => {
   const [blackTime, setBlackTime] = useState(GAME_TIME);
   const [whiteTime, setWhiteTime] = useState(GAME_TIME);
   const timer = useRef<null | ReturnType<typeof setInterval>>(null);
 
   useEffect(() => {
+    stopTimer();
+  }, [isStopped]);
+
+  useEffect(() => {
     startTimer();
-  }, [currentPlayer]);
+  }, [currentPlayer, isStopped]);
 
   const startTimer = () => {
-    if (timer.current) {
-      clearInterval(timer.current);
+    console.log('started');
+
+    if (timer.current) clearInterval(timer.current);
+    if (!isStopped) {
+      const callback =
+        currentPlayer?.color === Colors.WHITE ? decrementWhiteTimer : decrementBlackTimer;
+      timer.current = setInterval(callback, 1000);
     }
-    const callback =
-      currentPlayer?.color === Colors.WHITE ? decrementWhiteTimer : decrementBlackTimer;
-    timer.current = setInterval(callback, 1000);
+  };
+
+  const stopTimer = () => {
+    console.log('stopped');
+    if (isStopped && timer.current) clearInterval(timer.current);
   };
 
   const decrementBlackTimer = () => {

@@ -43,7 +43,7 @@ const App = () => {
   return (
     <div className="app">
       <Timer
-        isPaused={isCheckMate || isStalemate || isDraw}
+        isStopped={isCheckMate || isStalemate || isDraw}
         restart={restart}
         currentPlayer={currentPlayer}
       />
