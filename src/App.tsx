@@ -7,7 +7,7 @@ import BoardModule from 'modules/Board';
 import LostFigures from 'modules/LostFigures';
 import Timer from 'modules/Timer';
 import { WinnerMessage } from 'components/WinnerMessage';
-import { StalemateMessage } from 'components/StalemateMessage';
+import { MessageAboutDraw } from 'components/MessageAboutDraw';
 
 const App = () => {
   const [board, setBoard] = useState(new Board());
@@ -15,6 +15,7 @@ const App = () => {
   const [blackPlayer] = useState(new Player(Colors.BLACK));
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [isCheckMate, setIsCheckMate] = useState(false);
+  const [isDraw, setIsDraw] = useState(false);
   const [isStalemate, setIsStalemate] = useState(false);
 
   useEffect(() => {
@@ -28,6 +29,7 @@ const App = () => {
     setBoard(newBoard);
     setCurrentPlayer(whitePlayer);
     setIsCheckMate(false);
+    setIsDraw(false);
     setIsStalemate(false);
   };
 
@@ -40,13 +42,18 @@ const App = () => {
 
   return (
     <div className="app">
-      <Timer restart={restart} currentPlayer={currentPlayer} />
+      <Timer
+        isPaused={isCheckMate || isStalemate || isDraw}
+        restart={restart}
+        currentPlayer={currentPlayer}
+      />
       <BoardModule
         board={board}
         setBoard={setBoard}
         currentPlayer={currentPlayer}
         swapPlayer={swapPlayer}
         setIsCheckMate={setIsCheckMate}
+        setIsDraw={setIsDraw}
         setIsStalemate={setIsStalemate}
       />
       <div>
@@ -54,7 +61,7 @@ const App = () => {
         <LostFigures title="White pieces" figures={board.lostWhiteFigures} />
       </div>
       {isCheckMate && <WinnerMessage winnerColor={getWinnerColor()} />}
-      {isStalemate && <StalemateMessage />}
+      {(isStalemate || isDraw) && <MessageAboutDraw isStalemate={isStalemate} />}
     </div>
   );
 };

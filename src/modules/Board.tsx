@@ -11,6 +11,7 @@ interface BoardProps {
   currentPlayer: Player | null;
   swapPlayer: () => void;
   setIsCheckMate: (isCheckMate: boolean) => void;
+  setIsDraw: (isDraw: boolean) => void;
   setIsStalemate: (IsStalemate: boolean) => void;
 }
 
@@ -20,6 +21,7 @@ const BoardModule: FC<BoardProps> = ({
   currentPlayer,
   swapPlayer,
   setIsCheckMate,
+  setIsDraw,
   setIsStalemate,
 }) => {
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
@@ -39,6 +41,7 @@ const BoardModule: FC<BoardProps> = ({
       const newBoard = board.getCopyBoard(nextPlayerColor, board.isInCheck(opponentFigures));
 
       if (newBoard.isCheckMate()) setIsCheckMate(true);
+      if (newBoard.isDraw()) setIsDraw(true);
       if (newBoard.isStalemate()) setIsStalemate(true);
 
       newBoard.resetCellAvailabilityFlags();

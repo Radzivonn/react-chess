@@ -59,6 +59,42 @@ export class Board {
     return newBoard;
   }
 
+  isDraw() {
+    if (this.blackFigures.length === 1 && this.whiteFigures.length === 1) return true;
+    if (
+      this.blackFigures.length === 2 &&
+      this.whiteFigures.length === 1 &&
+      this.blackFigures.find((f) => f.name === FigureNames.KNIGHT)
+    ) {
+      return true;
+    }
+    if (
+      this.whiteFigures.length === 2 &&
+      this.blackFigures.length === 1 &&
+      this.whiteFigures.find((f) => f.name === FigureNames.KNIGHT)
+    ) {
+      return true;
+    }
+    if (
+      (this.blackFigures.length > 1 && this.whiteFigures.length > 1) ||
+      this.blackFigures.length > 1 ||
+      this.whiteFigures.length > 1
+    ) {
+      const bishops: Figure[] = [];
+      for (const figure of [...this.blackFigures, ...this.whiteFigures]) {
+        if (figure.name === FigureNames.BISHOP) bishops.push(figure);
+        else if (figure.name !== FigureNames.KING) return false;
+      }
+      return (
+        bishops.length ===
+          bishops.filter((f) => this.getCell(f.x, f.y).color === Colors.BLACK).length ||
+        bishops.length ===
+          bishops.filter((f) => this.getCell(f.x, f.y).color === Colors.WHITE).length
+      );
+    }
+    return false;
+  }
+
   isStalemate() {
     if (!this.checkState) {
       for (let y = 0; y < this.cells.length; y++) {
@@ -337,11 +373,11 @@ export class Board {
   }
 
   public addFigures() {
-    this.addPawns();
-    this.addKnights();
     this.addKings();
-    this.addBishops();
     this.addQueens();
-    this.addRooks();
+    // this.addBishops();
+    // this.addKnights();
+    // this.addRooks();
+    // this.addPawns();
   }
 }
