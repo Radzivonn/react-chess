@@ -6,6 +6,8 @@ import blackLogo from 'assets/black-rook.svg';
 import whiteLogo from 'assets/white-rook.svg';
 
 export class Rook extends Figure {
+  public hasMoved = false;
+
   constructor(x: number, y: number, color: Colors, id?: number) {
     super(x, y, color, id);
     this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
@@ -19,6 +21,10 @@ export class Rook extends Figure {
       return true;
     }
     return false;
+  }
+
+  moveFigure() {
+    this.hasMoved = true;
   }
 
   clone() {

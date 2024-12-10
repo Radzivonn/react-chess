@@ -60,31 +60,32 @@ export class Board {
   }
 
   isDraw() {
+    // King vs King
     if (this.blackFigures.length === 1 && this.whiteFigures.length === 1) return true;
-    if (
-      this.blackFigures.length === 2 &&
-      this.whiteFigures.length === 1 &&
-      this.blackFigures.find((f) => f.name === FigureNames.KNIGHT)
-    ) {
-      return true;
+
+    // King and Minor Piece vs King
+    if (this.blackFigures.length === 2 && this.whiteFigures.length === 1) {
+      return this.blackFigures.some(
+        (figure) => figure instanceof Knight || figure instanceof Bishop,
+      );
     }
-    if (
-      this.whiteFigures.length === 2 &&
-      this.blackFigures.length === 1 &&
-      this.whiteFigures.find((f) => f.name === FigureNames.KNIGHT)
-    ) {
-      return true;
+
+    if (this.whiteFigures.length === 2 && this.blackFigures.length === 1) {
+      return this.whiteFigures.some(
+        (figure) => figure instanceof Knight || figure instanceof Bishop,
+      );
     }
-    if (
-      (this.blackFigures.length > 1 && this.whiteFigures.length > 1) ||
-      this.blackFigures.length > 1 ||
-      this.whiteFigures.length > 1
-    ) {
+
+    // both sides have some bishops of same color
+    if (this.blackFigures.length > 1 && this.whiteFigures.length > 1) {
       const bishops: Figure[] = [];
+
       for (const figure of [...this.blackFigures, ...this.whiteFigures]) {
         if (figure.name === FigureNames.BISHOP) bishops.push(figure);
         else if (figure.name !== FigureNames.KING) return false;
       }
+
+      // ? probably do another way to check same colors
       return (
         bishops.length ===
           bishops.filter((f) => this.getCell(f.x, f.y).color === Colors.BLACK).length ||
@@ -183,6 +184,7 @@ export class Board {
     this.cells[currentCell.y][currentCell.x].figure = currentFigureClone;
     this.cells[targetCell.y][targetCell.x].figure = targetFigureClone;
 
+    // Не связывать фигуры из cells и из массивов фигур, а сделать разные instance в начале, чтобы не делать этих операций
     this.replaceFigures(currentFigureClone);
     if (targetFigureClone) this.replaceFigures(targetFigureClone);
 
@@ -229,6 +231,19 @@ export class Board {
     }
   }
 
+  castle(king: King, kingSideCastle: boolean) {
+    const rookDirection = kingSideCastle ? -1 : 1;
+    const rookX = kingSideCastle ? 7 : 0;
+    const rook =
+      king.color === Colors.BLACK
+        ? this.blackFigures.find((f) => f instanceof Rook && f.x === rookX)
+        : this.whiteFigures.find((f) => f instanceof Rook && f.x === rookX);
+
+    if (rook) {
+      this.moveFigure(this.getCell(rook.x, rook.y), this.getCell(king.x + rookDirection, rook.y));
+    }
+  }
+
   moveFigure(currentCell: Cell, target: Cell) {
     const currentFigure = currentCell.figure;
     if (currentFigure) {
@@ -247,6 +262,12 @@ export class Board {
       } else {
         const figureIndex = this.whiteFigures.findIndex((f) => f.id === currentFigure.id);
         if (figureIndex) this.whiteFigures[figureIndex] = target.figure;
+      }
+
+      if (currentFigure instanceof King && currentCell.x - target.x === -2) {
+        this.castle(currentFigure, true); // king side castle
+      } else if (currentFigure instanceof King && currentCell.x - target.x === 2) {
+        this.castle(currentFigure, false); // non king side castle
       }
 
       currentCell.figure = null;
@@ -308,8 +329,8 @@ export class Board {
   }
 
   private addKings() {
-    const blackKing = new King(4, 0, Colors.BLACK);
-    const whiteKing = new King(4, 7, Colors.WHITE);
+    const blackKing = new King(4, 0, Colors.BLACK, false);
+    const whiteKing = new King(4, 7, Colors.WHITE, false);
 
     this.cells[0][4].figure = blackKing;
     this.cells[7][4].figure = whiteKing;
