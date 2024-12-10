@@ -24,8 +24,6 @@ const Timer: FC<TimerProps> = ({ isStopped, currentPlayer, restart }) => {
   }, [currentPlayer, isStopped]);
 
   const startTimer = () => {
-    console.log('started');
-
     if (timer.current) clearInterval(timer.current);
     if (!isStopped) {
       const callback =
@@ -35,7 +33,6 @@ const Timer: FC<TimerProps> = ({ isStopped, currentPlayer, restart }) => {
   };
 
   const stopTimer = () => {
-    console.log('stopped');
     if (isStopped && timer.current) clearInterval(timer.current);
   };
 
