@@ -85,12 +85,9 @@ export class Board {
         else if (figure.name !== FigureNames.KING) return false;
       }
 
-      // ? probably do another way to check same colors
       return (
-        bishops.length ===
-          bishops.filter((f) => this.getCell(f.x, f.y).color === Colors.BLACK).length ||
-        bishops.length ===
-          bishops.filter((f) => this.getCell(f.x, f.y).color === Colors.WHITE).length
+        bishops.every((f) => this.getCell(f.x, f.y).color === Colors.BLACK) ||
+        bishops.every((f) => this.getCell(f.x, f.y).color === Colors.WHITE)
       );
     }
     return false;
@@ -124,22 +121,6 @@ export class Board {
       return true;
     }
     return false;
-  }
-
-  private replaceFigures(figure: Figure) {
-    if (figure.color === Colors.BLACK) {
-      this.blackFigures.splice(
-        this.blackFigures.findIndex((f) => f.id === figure.id),
-        1,
-        figure,
-      );
-    } else {
-      this.whiteFigures.splice(
-        this.whiteFigures.findIndex((f) => f.id === figure.id),
-        1,
-        figure,
-      );
-    }
   }
 
   isInCheck(opponentFigures: Figure[]) {
@@ -183,10 +164,6 @@ export class Board {
 
     this.cells[currentCell.y][currentCell.x].figure = currentFigureClone;
     this.cells[targetCell.y][targetCell.x].figure = targetFigureClone;
-
-    // Не связывать фигуры из cells и из массивов фигур, а сделать разные instance в начале, чтобы не делать этих операций
-    this.replaceFigures(currentFigureClone);
-    if (targetFigureClone) this.replaceFigures(targetFigureClone);
 
     return !isInCheck;
   }
@@ -258,10 +235,10 @@ export class Board {
 
       if (currentFigure.color === Colors.BLACK) {
         const figureIndex = this.blackFigures.findIndex((f) => f.id === currentFigure.id);
-        if (figureIndex) this.blackFigures[figureIndex] = target.figure;
+        if (figureIndex) this.blackFigures[figureIndex] = target.figure.clone();
       } else {
         const figureIndex = this.whiteFigures.findIndex((f) => f.id === currentFigure.id);
-        if (figureIndex) this.whiteFigures[figureIndex] = target.figure;
+        if (figureIndex) this.whiteFigures[figureIndex] = target.figure.clone();
       }
 
       if (currentFigure instanceof King && currentCell.x - target.x === -2) {
@@ -320,11 +297,11 @@ export class Board {
     for (let i = 0; i < 8; i++) {
       const blackPawn = new Pawn(i, 1, Colors.BLACK, true);
       this.cells[1][i].figure = blackPawn;
-      this.blackFigures.push(blackPawn);
+      this.blackFigures.push(blackPawn.clone());
 
       const whitePawn = new Pawn(i, 6, Colors.WHITE, true);
       this.cells[6][i].figure = whitePawn;
-      this.whiteFigures.push(whitePawn);
+      this.whiteFigures.push(whitePawn.clone());
     }
   }
 
@@ -334,8 +311,8 @@ export class Board {
 
     this.cells[0][4].figure = blackKing;
     this.cells[7][4].figure = whiteKing;
-    this.blackFigures.push(blackKing);
-    this.whiteFigures.push(whiteKing);
+    this.blackFigures.push(blackKing.clone());
+    this.whiteFigures.push(whiteKing.clone());
   }
 
   private addQueens() {
@@ -344,8 +321,8 @@ export class Board {
 
     this.cells[0][3].figure = blackQueen;
     this.cells[7][3].figure = whiteQueen;
-    this.blackFigures.push(blackQueen);
-    this.whiteFigures.push(whiteQueen);
+    this.blackFigures.push(blackQueen.clone());
+    this.whiteFigures.push(whiteQueen.clone());
   }
 
   private addBishops() {
@@ -359,8 +336,8 @@ export class Board {
     this.cells[7][2].figure = whiteBishop;
     this.cells[7][5].figure = whiteBishop2;
 
-    this.blackFigures.push(blackBishop, blackBishop2);
-    this.whiteFigures.push(whiteBishop, whiteBishop2);
+    this.blackFigures.push(blackBishop.clone(), blackBishop2.clone());
+    this.whiteFigures.push(whiteBishop.clone(), whiteBishop2.clone());
   }
 
   private addKnights() {
@@ -374,8 +351,8 @@ export class Board {
     this.cells[7][1].figure = whiteKnight;
     this.cells[7][6].figure = whiteKnight2;
 
-    this.blackFigures.push(blackKnight, blackKnight2);
-    this.whiteFigures.push(whiteKnight, whiteKnight2);
+    this.blackFigures.push(blackKnight.clone(), blackKnight2.clone());
+    this.whiteFigures.push(whiteKnight.clone(), whiteKnight2.clone());
   }
 
   private addRooks() {
@@ -389,8 +366,8 @@ export class Board {
     this.cells[7][0].figure = whiteRook;
     this.cells[7][7].figure = whiteRook2;
 
-    this.blackFigures.push(blackRook, blackRook2);
-    this.whiteFigures.push(whiteRook, whiteRook2);
+    this.blackFigures.push(blackRook.clone(), blackRook2.clone());
+    this.whiteFigures.push(whiteRook.clone(), whiteRook2.clone());
   }
 
   public addFigures() {
