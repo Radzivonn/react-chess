@@ -1,6 +1,6 @@
 import { Figure } from './Figure';
 import { Board } from 'models/Board';
-import { Colors, FigureNames } from 'types/enums';
+import { Colors, FENChar } from 'types/enums';
 import { Cell } from '../Cell';
 import blackLogo from 'assets/black-king.svg';
 import whiteLogo from 'assets/white-king.svg';
@@ -11,8 +11,8 @@ export class King extends Figure {
 
   constructor(x: number, y: number, color: Colors, hasMoved: boolean, id?: number) {
     super(x, y, color, id);
+    this.FENChar = color === Colors.WHITE ? FENChar.WhiteKing : FENChar.BlackKing;
     this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
-    this.name = FigureNames.KING;
     this.hasMoved = hasMoved;
   }
 

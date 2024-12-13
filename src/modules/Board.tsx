@@ -3,7 +3,8 @@ import CellComponent from 'components/Cell';
 import { Board } from 'models/Board';
 import { Cell } from 'models/Cell';
 import { Player } from 'models/Player';
-import { Colors, FigureNames } from 'types/enums';
+import { Colors } from 'types/enums';
+import { King } from 'models/figures/King';
 
 interface BoardProps {
   board: Board;
@@ -67,23 +68,35 @@ const BoardModule: FC<BoardProps> = ({
     <div>
       <h3>Current Player {currentPlayer?.color}</h3>
       <div className="board">
-        {board.cells.map((row, index) => (
-          <React.Fragment key={index}>
-            {row.map((cell) => (
-              <CellComponent
-                click={click}
-                cell={cell}
-                key={cell.id}
-                selected={cell.x === selectedCell?.x && cell.y === selectedCell?.y}
-                checkState={
-                  cell.figure?.color === board.currentPlayerColor &&
-                  cell.figure.name === FigureNames.KING &&
-                  board.checkState
-                }
-              />
+        <ul className="symbols rows-numbers">
+          {board.ROWS_NUMBERS.map((num) => (
+            <li key={num}>{num}</li>
+          ))}
+        </ul>
+        <div className="cells-block">
+          {board.cells.map((row, index) => (
+            <React.Fragment key={index}>
+              {row.map((cell) => (
+                <CellComponent
+                  click={click}
+                  cell={cell}
+                  key={cell.id}
+                  selected={cell.x === selectedCell?.x && cell.y === selectedCell?.y}
+                  checkState={
+                    cell.figure?.color === board.currentPlayerColor &&
+                    cell.figure instanceof King &&
+                    board.checkState
+                  }
+                />
+              ))}
+            </React.Fragment>
+          ))}
+          <ul className="symbols columns-letters">
+            {board.COLUMNS_LETTERS.map((symbol) => (
+              <li key={symbol}>{symbol}</li>
             ))}
-          </React.Fragment>
-        ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

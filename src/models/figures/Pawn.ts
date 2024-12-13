@@ -1,6 +1,6 @@
 import { Figure } from './Figure';
 import { Board } from 'models/Board';
-import { Colors, FigureNames } from 'types/enums';
+import { Colors, FENChar } from 'types/enums';
 import { Cell } from '../Cell';
 import blackLogo from 'assets/black-pawn.svg';
 import whiteLogo from 'assets/white-pawn.svg';
@@ -9,12 +9,13 @@ type Direction = 1 | -1;
 type FirstStepDirection = 2 | -2;
 
 export class Pawn extends Figure {
-  isFirstStep: boolean;
+  public hasMoved = false;
+  public isFirstStep: boolean;
 
   constructor(x: number, y: number, color: Colors, isFirstStep: boolean, id?: number) {
     super(x, y, color, id);
+    this.FENChar = color === Colors.WHITE ? FENChar.WhitePawn : FENChar.BlackPawn;
     this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
-    this.name = FigureNames.PAWN;
     this.isFirstStep = isFirstStep;
   }
 
@@ -61,6 +62,7 @@ export class Pawn extends Figure {
   // added moveFigure function for the pawn to track the first move
   moveFigure() {
     this.isFirstStep = false;
+    this.hasMoved = true;
   }
 
   clone() {

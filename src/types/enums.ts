@@ -3,12 +3,17 @@ export enum Colors {
   BLACK = 'black',
 }
 
-export enum FigureNames {
-  FIGURE = 'Chess piece',
-  KING = 'King',
-  KNIGHT = 'Knight',
-  PAWN = 'Pawn',
-  QUEEN = 'Queen',
-  ROOK = 'Rook',
-  BISHOP = 'Bishop',
+export enum FENChar {
+  WhitePawn = 'P',
+  WhiteKnight = 'N',
+  WhiteBishop = 'B',
+  WhiteRook = 'R',
+  WhiteQueen = 'Q',
+  WhiteKing = 'K',
+  BlackPawn = 'p',
+  BlackKnight = 'n',
+  BlackBishop = 'b',
+  BlackRook = 'r',
+  BlackQueen = 'q',
+  BlackKing = 'k',
 }

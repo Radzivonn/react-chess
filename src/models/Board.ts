@@ -1,5 +1,5 @@
 import { Cell } from './Cell';
-import { Colors, FigureNames } from 'types/enums';
+import { Colors } from 'types/enums';
 import { Pawn } from './figures/Pawn';
 import { King } from './figures/King';
 import { Queen } from './figures/Queen';
@@ -9,6 +9,14 @@ import { Rook } from './figures/Rook';
 import { Figure } from './figures/Figure';
 
 export class Board {
+  readonly boardOrientation: Colors = Colors.WHITE; // * temporary readonly
+  readonly ROWS_NUMBERS =
+    this.boardOrientation === Colors.WHITE ? [8, 7, 6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6, 7, 8];
+  readonly COLUMNS_LETTERS =
+    this.boardOrientation === Colors.WHITE
+      ? ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+      : ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'];
+
   currentPlayerColor = Colors.WHITE;
   checkState = false;
   cells: Cell[][] = [];
@@ -81,8 +89,8 @@ export class Board {
       const bishops: Figure[] = [];
 
       for (const figure of [...this.blackFigures, ...this.whiteFigures]) {
-        if (figure.name === FigureNames.BISHOP) bishops.push(figure);
-        else if (figure.name !== FigureNames.KING) return false;
+        if (figure instanceof Bishop) bishops.push(figure);
+        else if (!(figure instanceof King)) return false;
       }
 
       return (
@@ -125,13 +133,13 @@ export class Board {
 
   isInCheck(opponentFigures: Figure[]) {
     for (const figure of opponentFigures) {
-      const isPawn = figure.name === FigureNames.PAWN;
+      const isPawn = figure instanceof Pawn;
       for (let y = 0; y < this.cells.length; y++) {
         const row = this.cells[y];
         for (let x = 0; x < row.length; x++) {
           const target = row[x];
           const isKingTarget =
-            target.figure?.color !== figure.color && target.figure?.name === FigureNames.KING;
+            target.figure?.color !== figure.color && target.figure instanceof King;
 
           if (isKingTarget && isPawn && figure.isCellUnderAttack(target)) {
             return true;
