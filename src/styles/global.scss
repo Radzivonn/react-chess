@@ -74,10 +74,31 @@ body {
 }
 
 .board {
-  width: calc(80px * 8);
-  height: calc(80px * 8);
   display: flex;
-  flex-wrap: wrap;
+
+  .cells-block {
+    width: calc(80px * 8);
+    height: calc(80px * 8);
+    display: flex;
+    // flex-direction: column;
+    flex-wrap: wrap;
+  }
+
+  .symbols {
+    display: flex;
+    justify-content: space-around;
+    font-size: 24px;
+    color: var(--cell-light-color);
+    margin-right: 12px;
+    &.rows-numbers {
+      flex-direction: column;
+    }
+    &.columns-letters {
+      flex-direction: row;
+      width: inherit;
+      margin: 0;
+    }
+  }
 }
 
 .cell {
@@ -94,35 +115,52 @@ body {
   position: relative;
 }
 
+.available {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+}
+
 .white {
   background-color: var(--cell-light-color);
-  &.in-check {
-    background: radial-gradient(var(--cell-checkered-king-color) 43%, var(--cell-light-color) 85%);
+  .available {
+    background-color: var(--cell-dark-color);
+  }
+  &.highlight-capture {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--cell-dark-color),
+      var(--cell-dark-color) 6px,
+      var(--cell-light-color) 6px,
+      var(--cell-light-color) 14px
+    );
+    & img {
+      opacity: 0.8;
+    }
   }
 }
 
 .black {
   background-color: var(--cell-dark-color);
-  &.in-check {
-    background: radial-gradient(var(--cell-checkered-king-color) 43%, var(--cell-dark-color) 85%);
+  .available {
+    background-color: var(--cell-light-color);
+  }
+  &.highlight-capture {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--cell-light-color),
+      var(--cell-light-color) 6px,
+      var(--cell-dark-color) 6px,
+      var(--cell-dark-color) 14px
+    );
+    & img {
+      opacity: 0.8;
+    }
   }
 }
 
 .selected {
   background-color: var(--cell-selected-color);
-  &.in-check {
-    background: radial-gradient(
-      var(--cell-checkered-king-color) 43%,
-      var(--cell-selected-color) 85%
-    );
-  }
-}
-
-.available {
-  height: 16px;
-  width: 16px;
-  border-radius: 50%;
-  background-color: var(--cell-available-color);
 }
 
 .lost {

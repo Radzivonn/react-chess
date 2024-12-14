@@ -16,11 +16,9 @@ const CellComponent: FC<CellProps> = ({ cell, selected, checkState, click }) => 
         cell.color,
         selected ? 'selected' : '',
         checkState ? 'in-check' : '',
+        cell.available && cell.figure ? 'highlight-capture' : '',
       ].join(' ')}
       onClick={() => click(cell)}
-      style={{
-        background: cell.available && cell.figure ? 'var(--cell-with-figure-available-color)' : '',
-      }}
     >
       {cell.available && !cell.figure && <div className={'available'} />}
       {cell.figure?.logo && <img src={cell.figure.logo} alt="" />}
