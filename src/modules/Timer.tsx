@@ -10,6 +10,13 @@ interface TimerProps {
 
 const GAME_TIME = 600; // (10 minutes) in seconds
 
+/* convert time to mm:ss format */
+const convertTime = (allTimeInSeconds: number) => {
+  const minutes = Math.floor(allTimeInSeconds / 60);
+  const seconds = allTimeInSeconds % 60;
+  return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
+};
+
 const Timer: FC<TimerProps> = ({ isStopped, currentPlayer, restart }) => {
   const [blackTime, setBlackTime] = useState(GAME_TIME);
   const [whiteTime, setWhiteTime] = useState(GAME_TIME);
@@ -55,8 +62,8 @@ const Timer: FC<TimerProps> = ({ isStopped, currentPlayer, restart }) => {
       <div className="relative z-[500]">
         <button onClick={handleRestart}>Restart game</button>
       </div>
-      <h2>Black - {blackTime}</h2>
-      <h2>White - {whiteTime}</h2>
+      <h2>Black - {convertTime(blackTime)}</h2>
+      <h2>White - {convertTime(whiteTime)}</h2>
     </div>
   );
 };
