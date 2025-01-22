@@ -4,12 +4,12 @@ import { Colors, FENChar } from 'types/enums';
 import { Cell } from '../Cell';
 import blackLogo from 'assets/black-pawn.svg';
 import whiteLogo from 'assets/white-pawn.svg';
+import { LastMove } from 'types/types';
 
 type Direction = 1 | -1;
 type FirstStepDirection = 2 | -2;
 
 export class Pawn extends Figure {
-  public hasMoved = false;
   public isFirstStep: boolean;
 
   constructor(x: number, y: number, color: Colors, isFirstStep: boolean, id?: number) {
@@ -43,7 +43,10 @@ export class Pawn extends Figure {
     }
 
     // if beating move
-    if (this.isCellUnderAttack(target) && board.getCell(this.x, this.y).isEnemy(target)) {
+    if (
+      (this.isCellUnderAttack(target) && board.getCell(this.x, this.y).isEnemy(target)) ||
+      this.canCaptureEnPassant(target, board.lastMove)
+    ) {
       return true;
     }
     return false;
@@ -59,10 +62,43 @@ export class Pawn extends Figure {
     return false;
   }
 
+  canCaptureEnPassant(target: Cell, lastMove: LastMove | null): boolean {
+    if (!lastMove) return false;
+    const { figure, prevY } = lastMove;
+    const direction: Direction = this.color === Colors.BLACK ? 1 : -1;
+
+    if (
+      figure instanceof Pawn &&
+      Math.abs(figure.y - prevY) === 2 &&
+      Math.abs(this.x - figure.x) === 1 &&
+      this.y === figure.y &&
+      target.y === figure.y + direction &&
+      target.x === figure.x
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  isEnPassantCapture(lastMove: LastMove): boolean {
+    const { figure, prevY } = lastMove;
+
+    if (
+      figure instanceof Pawn &&
+      Math.abs(figure.y - prevY) === 2 &&
+      Math.abs(this.y - figure.y) === 1 &&
+      this.x === figure.x
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
   // added moveFigure function for the pawn to track the first move
   moveFigure() {
     this.isFirstStep = false;
-    this.hasMoved = true;
   }
 
   clone() {
