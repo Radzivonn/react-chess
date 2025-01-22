@@ -15,7 +15,7 @@ export class Board {
   private fiftyMoveRuleCounter: number = 0;
   private threeFoldRepetitionDictionary = new Map<string, number>();
   private threeFoldRepetitionFlag: boolean = false;
-  private boardAsFEN: string = FENConverter.initalPosition;
+  private boardAsFEN: string = FENConverter.initialPosition;
   private FENConverter = new FENConverter();
 
   readonly boardOrientation: Colors = Colors.WHITE; // * temporary readonly
@@ -81,6 +81,18 @@ export class Board {
     return newBoard;
   }
 
+  private playerHasOnlyTwoKnightsAndKing(figures: Figure[]): boolean {
+    return figures.filter((figure) => figure instanceof Knight).length === 2;
+  }
+
+  private playerHasOnlyBishopsWithSameColorAndKing(figures: Figure[]): boolean {
+    const bishops = figures.filter((figure) => figure instanceof Bishop);
+    const areAllBishopsOfSameColor =
+      new Set(bishops.map((bishop) => this.getCell(bishop.x, bishop.y).color === Colors.WHITE))
+        .size === 1;
+    return bishops.length === figures.length - 1 && areAllBishopsOfSameColor;
+  }
+
   isDraw() {
     if (this.threeFoldRepetitionFlag || this.fiftyMoveRuleCounter === 50) return true;
 
@@ -100,20 +112,41 @@ export class Board {
       );
     }
 
-    // both sides have some bishops of same color
-    if (this.blackFigures.length > 1 && this.whiteFigures.length > 1) {
-      const bishops: Figure[] = [];
+    // both sides have bishop of same color
+    if (this.whiteFigures.length === 2 && this.blackFigures.length === 2) {
+      const whiteBishop = this.whiteFigures.find((figure) => figure instanceof Bishop);
+      const blackBishop = this.blackFigures.find((figure) => figure instanceof Bishop);
 
-      for (const figure of [...this.blackFigures, ...this.whiteFigures]) {
-        if (figure instanceof Bishop) bishops.push(figure);
-        else if (!(figure instanceof King)) return false;
+      if (whiteBishop && blackBishop) {
+        return (
+          this.getCell(whiteBishop.x, whiteBishop.y).color ===
+          this.getCell(blackBishop.x, blackBishop.y).color
+        );
       }
-
-      return (
-        bishops.every((f) => this.getCell(f.x, f.y).color === Colors.BLACK) ||
-        bishops.every((f) => this.getCell(f.x, f.y).color === Colors.WHITE)
-      );
     }
+
+    if (
+      (this.whiteFigures.length === 3 &&
+        this.blackFigures.length === 1 &&
+        this.playerHasOnlyTwoKnightsAndKing(this.whiteFigures)) ||
+      (this.whiteFigures.length === 1 &&
+        this.blackFigures.length === 3 &&
+        this.playerHasOnlyTwoKnightsAndKing(this.blackFigures))
+    ) {
+      return true;
+    }
+
+    if (
+      (this.whiteFigures.length >= 3 &&
+        this.blackFigures.length === 1 &&
+        this.playerHasOnlyBishopsWithSameColorAndKing(this.whiteFigures)) ||
+      (this.whiteFigures.length === 1 &&
+        this.blackFigures.length >= 3 &&
+        this.playerHasOnlyBishopsWithSameColorAndKing(this.blackFigures))
+    ) {
+      return true;
+    }
+
     return false;
   }
 
@@ -182,7 +215,7 @@ export class Board {
 
     let opponentFigures =
       this.currentPlayerColor === Colors.BLACK ? this.whiteFigures : this.blackFigures;
-    opponentFigures = opponentFigures.filter((f) => f.id !== targetFigureClone?.id); // exclude the captured piece in case of a move
+    opponentFigures = opponentFigures.filter((f) => f.id !== targetFigureClone?.id); // exclude the captured figure in case of a move
 
     const isInCheck = this.isInCheck(opponentFigures);
 
