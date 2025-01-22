@@ -17,3 +17,12 @@ export enum FENChar {
   BlackQueen = 'q',
   BlackKing = 'k',
 }
+
+export enum MoveType {
+  Capture,
+  Castling,
+  Promotion,
+  Check,
+  CheckMate,
+  BasicMove,
+}
