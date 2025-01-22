@@ -31,6 +31,7 @@ export class Board {
   lostBlackFigures: Figure[] = [];
   lostWhiteFigures: Figure[] = [];
   lastMove: LastMove | null = null;
+  gameOverMessage: string | null = null;
 
   public initCells() {
     for (let y = 0; y < 8; y++) {
@@ -76,9 +77,38 @@ export class Board {
     newBoard.threeFoldRepetitionDictionary = this.threeFoldRepetitionDictionary;
     newBoard.boardAsFEN = this.boardAsFEN;
     newBoard.threeFoldRepetitionFlag = this.threeFoldRepetitionFlag;
-
+    newBoard.gameOverMessage = this.gameOverMessage;
     /* заменить на глубокое копирование объекта */
     return newBoard;
+  }
+
+  isGameFinished(): boolean {
+    if (this.insufficientMaterial()) {
+      this.gameOverMessage = 'Draw due insufficient material';
+      return true;
+    }
+
+    if (this.isCheckMate()) {
+      this.gameOverMessage = `${this.currentPlayerColor === Colors.WHITE ? Colors.BLACK : Colors.WHITE} won by checkmate`;
+      return true;
+    }
+
+    if (this.isStalemate()) {
+      this.gameOverMessage = 'Stalemate';
+      return true;
+    }
+
+    if (this.threeFoldRepetitionFlag) {
+      this.gameOverMessage = 'Draw due three fold repetition rule';
+      return true;
+    }
+
+    if (this.fiftyMoveRuleCounter === 50) {
+      this.gameOverMessage = 'Draw due fifty move rule';
+      return true;
+    }
+
+    return false;
   }
 
   private playerHasOnlyTwoKnightsAndKing(figures: Figure[]): boolean {
@@ -93,9 +123,7 @@ export class Board {
     return bishops.length === figures.length - 1 && areAllBishopsOfSameColor;
   }
 
-  isDraw() {
-    if (this.threeFoldRepetitionFlag || this.fiftyMoveRuleCounter === 50) return true;
-
+  insufficientMaterial() {
     // King vs King
     if (this.blackFigures.length === 1 && this.whiteFigures.length === 1) return true;
 
@@ -170,8 +198,8 @@ export class Board {
       for (let y = 0; y < this.cells.length; y++) {
         const row = this.cells[y];
         for (let x = 0; x < row.length; x++) {
-          const target = row[x];
-          if (target.figure?.color === this.currentPlayerColor && this.countAvailableCells(target))
+          const cell = row[x];
+          if (cell.figure?.color === this.currentPlayerColor && this.countAvailableCells(cell))
             return false;
         }
       }
@@ -231,12 +259,9 @@ export class Board {
       const row = this.cells[y];
       for (let x = 0; x < row.length; x++) {
         const target = row[x];
-        let isPositionSafeAfterMove = false;
         const isFigureCanMove = !!selectedCell?.figure?.canMove(this, target);
-        if (isFigureCanMove) {
-          isPositionSafeAfterMove = this.isPositionSafeAfterMove(selectedCell, target);
-        }
-        if (isFigureCanMove && isPositionSafeAfterMove) {
+
+        if (isFigureCanMove && this.isPositionSafeAfterMove(selectedCell, target)) {
           target.available = true;
           hasAvailableCells = true;
         }
