@@ -1,5 +1,7 @@
 import { Cell } from './Cell';
+import { FENConverter } from './FENConverter';
 import { Colors } from 'types/enums';
+import { columns, LastMove } from 'types/types';
 import { Pawn } from './figures/Pawn';
 import { King } from './figures/King';
 import { Queen } from './figures/Queen';
@@ -9,13 +11,17 @@ import { Rook } from './figures/Rook';
 import { Figure } from './figures/Figure';
 
 export class Board {
+  private fullNumberOfMoves: number = 0;
+  private fiftyMoveRuleCounter: number = 0;
+  private threeFoldRepetitionDictionary = new Map<string, number>();
+  private threeFoldRepetitionFlag: boolean = false;
+  private boardAsFEN: string = FENConverter.initalPosition;
+  private FENConverter = new FENConverter();
+
   readonly boardOrientation: Colors = Colors.WHITE; // * temporary readonly
   readonly ROWS_NUMBERS =
     this.boardOrientation === Colors.WHITE ? [8, 7, 6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6, 7, 8];
-  readonly COLUMNS_LETTERS =
-    this.boardOrientation === Colors.WHITE
-      ? ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-      : ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'];
+  readonly COLUMNS_LETTERS = this.boardOrientation === Colors.WHITE ? columns : columns.reverse();
 
   currentPlayerColor = Colors.WHITE;
   checkState = false;
@@ -24,6 +30,7 @@ export class Board {
   whiteFigures: Figure[] = [];
   lostBlackFigures: Figure[] = [];
   lostWhiteFigures: Figure[] = [];
+  lastMove: LastMove | null = null;
 
   public initCells() {
     for (let y = 0; y < 8; y++) {
@@ -63,11 +70,20 @@ export class Board {
     newBoard.lostBlackFigures = this.lostBlackFigures;
     newBoard.blackFigures = this.blackFigures;
     newBoard.whiteFigures = this.whiteFigures;
+    newBoard.lastMove = this.lastMove;
+    newBoard.fullNumberOfMoves = this.fullNumberOfMoves;
+    newBoard.fiftyMoveRuleCounter = this.fiftyMoveRuleCounter;
+    newBoard.threeFoldRepetitionDictionary = this.threeFoldRepetitionDictionary;
+    newBoard.boardAsFEN = this.boardAsFEN;
+    newBoard.threeFoldRepetitionFlag = this.threeFoldRepetitionFlag;
+
     /* заменить на глубокое копирование объекта */
     return newBoard;
   }
 
   isDraw() {
+    if (this.threeFoldRepetitionFlag || this.fiftyMoveRuleCounter === 50) return true;
+
     // King vs King
     if (this.blackFigures.length === 1 && this.whiteFigures.length === 1) return true;
 
@@ -234,6 +250,14 @@ export class Board {
     if (currentFigure) {
       currentFigure.moveFigure();
 
+      if (currentFigure instanceof Pawn || target.figure) this.fiftyMoveRuleCounter = 0;
+      else this.fiftyMoveRuleCounter += 0.5;
+
+      const prevPosition = {
+        prevX: currentFigure.x,
+        prevY: currentFigure.y,
+      };
+
       if (target.figure) this.addLostFigure(target.figure.clone());
 
       currentFigure.x = target.x;
@@ -249,13 +273,57 @@ export class Board {
         if (figureIndex) this.whiteFigures[figureIndex] = target.figure.clone();
       }
 
+      // En Passant capture
+      if (
+        this.lastMove &&
+        currentFigure instanceof Pawn &&
+        currentFigure.isEnPassantCapture(this.lastMove)
+      ) {
+        const capturedPawnCell = this.getCell(this.lastMove.figure.x, this.lastMove.figure.y);
+        if (capturedPawnCell.figure) {
+          this.addLostFigure(capturedPawnCell.figure.clone());
+          capturedPawnCell.figure = null;
+        }
+      }
+
       if (currentFigure instanceof King && currentCell.x - target.x === -2) {
         this.castle(currentFigure, true); // king side castle
       } else if (currentFigure instanceof King && currentCell.x - target.x === 2) {
-        this.castle(currentFigure, false); // non king side castle
+        this.castle(currentFigure, false); // queen side castle
       }
 
+      this.lastMove = {
+        ...prevPosition,
+        figure: currentFigure.clone(),
+      };
+
       currentCell.figure = null;
+
+      if (this.currentPlayerColor === Colors.WHITE) this.fullNumberOfMoves++;
+      this.boardAsFEN = this.FENConverter.convertBoardToFEN(
+        this.cells,
+        this.currentPlayerColor,
+        this.lastMove,
+        this.fiftyMoveRuleCounter,
+        this.fullNumberOfMoves,
+      );
+      this.updateThreeFoldRepetitionDictionary(this.boardAsFEN);
+    }
+  }
+
+  private updateThreeFoldRepetitionDictionary(FEN: string): void {
+    const threeFoldRepetitionFENKey: string = FEN.split(' ').slice(0, 4).join('');
+    const threeFoldRepetitionValue: number | undefined =
+      this.threeFoldRepetitionDictionary.get(threeFoldRepetitionFENKey);
+
+    if (!threeFoldRepetitionValue) {
+      this.threeFoldRepetitionDictionary.set(threeFoldRepetitionFENKey, 1);
+    } else {
+      if (threeFoldRepetitionValue === 2) {
+        this.threeFoldRepetitionFlag = true;
+        return;
+      }
+      this.threeFoldRepetitionDictionary.set(threeFoldRepetitionFENKey, 2);
     }
   }
 
