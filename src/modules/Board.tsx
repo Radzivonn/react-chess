@@ -4,16 +4,13 @@ import { Board } from 'models/Board';
 import { Cell } from 'models/Cell';
 import { Player } from 'models/Player';
 import { Colors } from 'types/enums';
-import { King } from 'models/figures/King';
 
 interface BoardProps {
   board: Board;
   setBoard: (board: Board) => void;
   currentPlayer: Player | null;
   swapPlayer: () => void;
-  setIsCheckMate: (isCheckMate: boolean) => void;
-  setIsDraw: (isDraw: boolean) => void;
-  setIsStalemate: (IsStalemate: boolean) => void;
+  setGameOverMessage: (gameOverMessage: string | null) => void;
 }
 
 const BoardModule: FC<BoardProps> = ({
@@ -21,9 +18,7 @@ const BoardModule: FC<BoardProps> = ({
   setBoard,
   currentPlayer,
   swapPlayer,
-  setIsCheckMate,
-  setIsDraw,
-  setIsStalemate,
+  setGameOverMessage,
 }) => {
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
 
@@ -41,9 +36,7 @@ const BoardModule: FC<BoardProps> = ({
 
       const newBoard = board.getCopyBoard(nextPlayerColor, board.isInCheck(opponentFigures));
 
-      if (newBoard.isCheckMate()) setIsCheckMate(true);
-      if (newBoard.isDraw()) setIsDraw(true);
-      if (newBoard.isStalemate()) setIsStalemate(true);
+      if (newBoard.isGameFinished()) setGameOverMessage(newBoard.gameOverMessage);
 
       newBoard.resetCellAvailabilityFlags();
 
@@ -82,11 +75,6 @@ const BoardModule: FC<BoardProps> = ({
                   cell={cell}
                   key={cell.id}
                   selected={cell.x === selectedCell?.x && cell.y === selectedCell?.y}
-                  checkState={
-                    cell.figure?.color === board.currentPlayerColor &&
-                    cell.figure instanceof King &&
-                    board.checkState
-                  }
                 />
               ))}
             </React.Fragment>
