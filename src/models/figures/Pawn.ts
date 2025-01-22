@@ -83,11 +83,13 @@ export class Pawn extends Figure {
 
   isEnPassantCapture(lastMove: LastMove): boolean {
     const { figure, prevY } = lastMove;
+    const direction: Direction = this.color === Colors.BLACK ? 1 : -1;
 
     if (
       figure instanceof Pawn &&
       Math.abs(figure.y - prevY) === 2 &&
       Math.abs(this.y - figure.y) === 1 &&
+      this.y === figure.y + direction &&
       this.x === figure.x
     ) {
       return true;
