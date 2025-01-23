@@ -3,7 +3,7 @@ import CellComponent from 'components/Cell';
 import { Board } from 'models/Board';
 import { Cell } from 'models/Cell';
 import { Player } from 'models/Player';
-import { Colors, FENChar } from 'types/enums';
+import { FENChar } from 'types/enums';
 import { PromotionFigureDialog } from 'components/PromotionFigureDialog';
 import { Pawn } from 'models/figures/Pawn';
 
@@ -45,16 +45,9 @@ const BoardModule: FC<BoardProps> = ({
         setTargetCell(cell);
         setIsPromotionDialogActive(true);
       } else {
-        board.moveFigure(selectedCell, cell, promotedFigure);
+        const newBoard = board.moveFigure(selectedCell, cell, promotedFigure);
 
-        const nextPlayerColor = currentPlayer.color === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
-        const opponentFigures =
-          nextPlayerColor === Colors.BLACK ? board.whiteFigures : board.blackFigures;
-        const newBoard = board.getCopyBoard(nextPlayerColor, board.isInCheck(opponentFigures));
-
-        if (newBoard.isGameFinished()) setGameOverMessage(newBoard.gameOverMessage);
-        newBoard.resetCellAvailabilityFlags();
-
+        setGameOverMessage(newBoard.gameOverMessage);
         setBoard(newBoard);
         setSelectedCell(null);
         setIsPromotionDialogActive(false);
@@ -71,7 +64,7 @@ const BoardModule: FC<BoardProps> = ({
   const highlightCells = () => {
     if (currentPlayer && selectedCell) {
       board.highlightCells(selectedCell);
-      const newBoard = board.getCopyBoard(currentPlayer.color, board.checkState);
+      const newBoard = board.getCopyBoard(currentPlayer.color);
       setBoard(newBoard);
     }
   };

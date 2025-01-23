@@ -1,5 +1,5 @@
 import { Figure } from 'models/figures/Figure';
-import { FENChar } from 'types/enums';
+import { FENChar, MoveType } from 'types/enums';
 
 export type MoveList = [string, string?][];
 
@@ -7,6 +7,7 @@ export type LastMove = {
   figure: Figure;
   prevX: number;
   prevY: number;
+  moveType: Set<MoveType>;
 };
 
 export type GameHistory = {

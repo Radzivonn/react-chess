@@ -1,7 +1,7 @@
 import { Cell } from './Cell';
 import { FENConverter } from './FENConverter';
-import { Colors, FENChar } from 'types/enums';
-import { columns, LastMove } from 'types/types';
+import { Colors, FENChar, MoveType } from 'types/enums';
+import { columns, LastMove, MoveList } from 'types/types';
 import { Pawn } from './figures/Pawn';
 import { King } from './figures/King';
 import { Queen } from './figures/Queen';
@@ -11,7 +11,7 @@ import { Rook } from './figures/Rook';
 import { Figure } from './figures/Figure';
 
 export class Board {
-  private fullNumberOfMoves: number = 0;
+  private fullNumberOfMoves: number = 1;
   private fiftyMoveRuleCounter: number = 0;
   private threeFoldRepetitionDictionary = new Map<string, number>();
   private threeFoldRepetitionFlag: boolean = false;
@@ -21,7 +21,8 @@ export class Board {
   readonly boardOrientation: Colors = Colors.WHITE; // * temporary readonly
   readonly ROWS_NUMBERS =
     this.boardOrientation === Colors.WHITE ? [8, 7, 6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6, 7, 8];
-  readonly COLUMNS_LETTERS = this.boardOrientation === Colors.WHITE ? columns : columns.reverse();
+  readonly COLUMNS_LETTERS =
+    this.boardOrientation === Colors.WHITE ? columns : columns.toReversed();
 
   currentPlayerColor = Colors.WHITE;
   checkState = false;
@@ -32,6 +33,7 @@ export class Board {
   lostWhiteFigures: Figure[] = [];
   lastMove: LastMove | null = null;
   gameOverMessage: string | null = null;
+  moveList: MoveList = [];
 
   public initCells() {
     for (let y = 0; y < 8; y++) {
@@ -61,11 +63,11 @@ export class Board {
     }
   }
 
-  public getCopyBoard(playerColor: Colors, checkState: boolean): Board {
+  public getCopyBoard(playerColor: Colors): Board {
     const newBoard = new Board();
     /* заменить на глубокое копирование объекта */
     newBoard.currentPlayerColor = playerColor;
-    newBoard.checkState = checkState;
+    newBoard.checkState = this.checkState;
     newBoard.cells = this.cells;
     newBoard.lostWhiteFigures = this.lostWhiteFigures;
     newBoard.lostBlackFigures = this.lostBlackFigures;
@@ -323,77 +325,106 @@ export class Board {
 
   public moveFigure(currentCell: Cell, target: Cell, promotedFigure?: FENChar) {
     let currentFigure = currentCell.figure;
-    if (currentFigure) {
-      currentFigure.moveFigure();
 
-      if (currentFigure instanceof Pawn || target.figure) this.fiftyMoveRuleCounter = 0;
-      else this.fiftyMoveRuleCounter += 0.5;
+    if (!currentFigure) return this;
 
-      const prevPosition = {
-        prevX: currentFigure.x,
-        prevY: currentFigure.y,
-      };
+    currentFigure.moveFigure();
 
-      if (target.figure) this.addLostFigure(target.figure.clone());
+    if (currentFigure instanceof Pawn || target.figure) this.fiftyMoveRuleCounter = 0;
+    else this.fiftyMoveRuleCounter += 0.5;
 
-      if (promotedFigure) {
-        currentFigure = this.getPromotedFigure(
-          currentFigure.x,
-          currentFigure.y,
-          currentFigure.id,
-          promotedFigure,
-        );
-      }
+    const lastMoveTemp = {
+      figure: currentFigure.clone(),
+      prevX: currentFigure.x,
+      prevY: currentFigure.y,
+    };
+    lastMoveTemp.figure.x = target.x;
+    lastMoveTemp.figure.y = target.y;
+    const moveType = new Set<MoveType>();
 
-      currentFigure.x = target.x;
-      currentFigure.y = target.y;
-
-      target.figure = currentFigure.clone();
-
-      if (currentFigure.color === Colors.BLACK) {
-        const figureIndex = this.blackFigures.findIndex((f) => f.id === currentFigure?.id);
-        if (figureIndex) this.blackFigures[figureIndex] = target.figure.clone();
-      } else {
-        const figureIndex = this.whiteFigures.findIndex((f) => f.id === currentFigure?.id);
-        if (figureIndex) this.whiteFigures[figureIndex] = target.figure.clone();
-      }
-
-      // En Passant capture
-      if (
-        this.lastMove &&
-        currentFigure instanceof Pawn &&
-        currentFigure.isEnPassantCapture(this.lastMove)
-      ) {
-        const capturedPawnCell = this.getCell(this.lastMove.figure.x, this.lastMove.figure.y);
-        if (capturedPawnCell.figure) {
-          this.addLostFigure(capturedPawnCell.figure.clone());
-          capturedPawnCell.figure = null;
-        }
-      }
-
-      if (currentFigure instanceof King && currentCell.x - target.x === -2) {
-        this.castle(currentFigure, true); // king side castle
-      } else if (currentFigure instanceof King && currentCell.x - target.x === 2) {
-        this.castle(currentFigure, false); // queen side castle
-      }
-
-      this.lastMove = {
-        ...prevPosition,
-        figure: currentFigure.clone(),
-      };
-
-      currentCell.figure = null;
-
-      if (this.currentPlayerColor === Colors.WHITE) this.fullNumberOfMoves++;
-      this.boardAsFEN = this.FENConverter.convertBoardToFEN(
-        this.cells,
-        this.currentPlayerColor,
-        this.lastMove,
-        this.fiftyMoveRuleCounter,
-        this.fullNumberOfMoves,
-      );
-      this.updateThreeFoldRepetitionDictionary(this.boardAsFEN);
+    if (target.figure) {
+      this.addLostFigure(target.figure.clone());
+      moveType.add(MoveType.Capture);
     }
+
+    if (promotedFigure) {
+      currentFigure = this.getPromotedFigure(
+        currentFigure.x,
+        currentFigure.y,
+        currentFigure.id,
+        promotedFigure,
+      );
+      moveType.add(MoveType.Promotion);
+    }
+
+    currentFigure.x = target.x;
+    currentFigure.y = target.y;
+
+    target.figure = currentFigure.clone();
+
+    if (currentFigure.color === Colors.BLACK) {
+      const figureIndex = this.blackFigures.findIndex((f) => f.id === currentFigure?.id);
+      if (figureIndex) this.blackFigures[figureIndex] = target.figure.clone();
+    } else {
+      const figureIndex = this.whiteFigures.findIndex((f) => f.id === currentFigure?.id);
+      if (figureIndex) this.whiteFigures[figureIndex] = target.figure.clone();
+    }
+
+    // En Passant capture
+    if (
+      this.lastMove &&
+      currentFigure instanceof Pawn &&
+      currentFigure.isEnPassantCapture(this.lastMove)
+    ) {
+      const capturedPawnCell = this.getCell(this.lastMove.figure.x, this.lastMove.figure.y);
+      if (capturedPawnCell.figure) {
+        this.addLostFigure(capturedPawnCell.figure.clone());
+        capturedPawnCell.figure = null;
+        moveType.add(MoveType.Capture);
+      }
+    }
+
+    if (currentFigure instanceof King && currentCell.x - target.x === -2) {
+      this.castle(currentFigure, true); // king side castle
+      moveType.add(MoveType.Castling);
+    } else if (currentFigure instanceof King && currentCell.x - target.x === 2) {
+      this.castle(currentFigure, false); // queen side castle
+      moveType.add(MoveType.Castling);
+    }
+
+    currentCell.figure = null;
+
+    if (this.currentPlayerColor === Colors.WHITE) this.fullNumberOfMoves++;
+    this.boardAsFEN = this.FENConverter.convertBoardToFEN(
+      this.cells,
+      this.currentPlayerColor,
+      this.lastMove,
+      this.fiftyMoveRuleCounter,
+      this.fullNumberOfMoves,
+    );
+    this.updateThreeFoldRepetitionDictionary(this.boardAsFEN);
+
+    const nextPlayerColor = this.currentPlayerColor === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
+    const opponentFigures =
+      nextPlayerColor === Colors.BLACK ? this.whiteFigures : this.blackFigures;
+
+    this.checkState = this.isInCheck(opponentFigures);
+    const newBoard = this.getCopyBoard(nextPlayerColor);
+    const isGameFinished = newBoard.isGameFinished();
+
+    if (this.checkState && isGameFinished) moveType.add(MoveType.CheckMate);
+    else if (this.checkState) moveType.add(MoveType.Check);
+    else if (!moveType.size) moveType.add(MoveType.BasicMove);
+
+    this.lastMove = {
+      ...lastMoveTemp,
+      moveType,
+    };
+
+    this.storeMove(promotedFigure);
+
+    newBoard.resetCellAvailabilityFlags();
+    return newBoard;
   }
 
   private updateThreeFoldRepetitionDictionary(FEN: string): void {
@@ -410,6 +441,32 @@ export class Board {
       }
       this.threeFoldRepetitionDictionary.set(threeFoldRepetitionFENKey, 2);
     }
+  }
+
+  private storeMove(promotedFigure?: FENChar): void {
+    const { figure, prevX, prevY, moveType } = this.lastMove!;
+    const figureName =
+      figure.FENChar && !(figure instanceof Pawn) ? figure.FENChar.toUpperCase() : '';
+    let move = '';
+
+    if (moveType.has(MoveType.Castling)) move = figure.x - prevX === 2 ? 'O-O' : 'O-O-O';
+    else {
+      move = figureName + columns[prevX] + String(this.ROWS_NUMBERS[prevY]);
+      if (moveType.has(MoveType.Capture))
+        move += figure instanceof Pawn ? columns[prevY] + 'x' : 'x';
+      move += columns[figure.x] + String(this.ROWS_NUMBERS[figure.y]);
+
+      if (promotedFigure) move += '=' + promotedFigure.toUpperCase();
+    }
+
+    if (moveType.has(MoveType.Check)) move += '+';
+    else if (moveType.has(MoveType.CheckMate)) move += '#';
+
+    if (!this.moveList[this.fullNumberOfMoves - 1])
+      this.moveList[this.fullNumberOfMoves - 1] = [move];
+    else this.moveList[this.fullNumberOfMoves - 1].push(move);
+
+    console.log('move ', this.moveList.length - 1, ' = ', move);
   }
 
   isEmptyVertical(currentX: number, currentY: number, targetX: number, targetY: number): boolean {
