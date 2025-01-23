@@ -98,6 +98,8 @@ export class Pawn extends Figure {
     return false;
   }
 
+  public isPromotionMove = (newY: number) => newY === 0 || newY === 7;
+
   // added moveFigure function for the pawn to track the first move
   moveFigure() {
     this.isFirstStep = false;

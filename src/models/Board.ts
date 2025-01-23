@@ -1,6 +1,6 @@
 import { Cell } from './Cell';
 import { FENConverter } from './FENConverter';
-import { Colors } from 'types/enums';
+import { Colors, FENChar } from 'types/enums';
 import { columns, LastMove } from 'types/types';
 import { Pawn } from './figures/Pawn';
 import { King } from './figures/King';
@@ -82,7 +82,7 @@ export class Board {
     return newBoard;
   }
 
-  isGameFinished(): boolean {
+  public isGameFinished(): boolean {
     if (this.insufficientMaterial()) {
       this.gameOverMessage = 'Draw due insufficient material';
       return true;
@@ -123,7 +123,7 @@ export class Board {
     return bishops.length === figures.length - 1 && areAllBishopsOfSameColor;
   }
 
-  insufficientMaterial() {
+  private insufficientMaterial() {
     // King vs King
     if (this.blackFigures.length === 1 && this.whiteFigures.length === 1) return true;
 
@@ -274,7 +274,7 @@ export class Board {
     if (selectedCell.figure) this.countAvailableCells(selectedCell);
   }
 
-  addLostFigure(figure: Figure) {
+  private addLostFigure(figure: Figure) {
     if (figure.color === Colors.BLACK) {
       this.lostBlackFigures.push(figure);
       this.blackFigures.splice(
@@ -290,7 +290,7 @@ export class Board {
     }
   }
 
-  castle(king: King, kingSideCastle: boolean) {
+  private castle(king: King, kingSideCastle: boolean) {
     const rookDirection = kingSideCastle ? -1 : 1;
     const rookX = kingSideCastle ? 7 : 0;
     const rook =
@@ -303,8 +303,26 @@ export class Board {
     }
   }
 
-  moveFigure(currentCell: Cell, target: Cell) {
-    const currentFigure = currentCell.figure;
+  private getPromotedFigure(
+    x: number,
+    y: number,
+    id: number,
+    promotedFigure: FENChar,
+  ): Knight | Bishop | Rook | Queen {
+    if (promotedFigure === FENChar.WhiteKnight || promotedFigure === FENChar.BlackKnight)
+      return new Knight(x, y, this.currentPlayerColor, id);
+
+    if (promotedFigure === FENChar.WhiteBishop || promotedFigure === FENChar.BlackBishop)
+      return new Bishop(x, y, this.currentPlayerColor, id);
+
+    if (promotedFigure === FENChar.WhiteRook || promotedFigure === FENChar.BlackRook)
+      return new Rook(x, y, this.currentPlayerColor, id);
+
+    return new Queen(x, y, this.currentPlayerColor, id);
+  }
+
+  public moveFigure(currentCell: Cell, target: Cell, promotedFigure?: FENChar) {
+    let currentFigure = currentCell.figure;
     if (currentFigure) {
       currentFigure.moveFigure();
 
@@ -318,16 +336,25 @@ export class Board {
 
       if (target.figure) this.addLostFigure(target.figure.clone());
 
+      if (promotedFigure) {
+        currentFigure = this.getPromotedFigure(
+          currentFigure.x,
+          currentFigure.y,
+          currentFigure.id,
+          promotedFigure,
+        );
+      }
+
       currentFigure.x = target.x;
       currentFigure.y = target.y;
 
       target.figure = currentFigure.clone();
 
       if (currentFigure.color === Colors.BLACK) {
-        const figureIndex = this.blackFigures.findIndex((f) => f.id === currentFigure.id);
+        const figureIndex = this.blackFigures.findIndex((f) => f.id === currentFigure?.id);
         if (figureIndex) this.blackFigures[figureIndex] = target.figure.clone();
       } else {
-        const figureIndex = this.whiteFigures.findIndex((f) => f.id === currentFigure.id);
+        const figureIndex = this.whiteFigures.findIndex((f) => f.id === currentFigure?.id);
         if (figureIndex) this.whiteFigures[figureIndex] = target.figure.clone();
       }
 

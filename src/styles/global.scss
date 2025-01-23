@@ -170,7 +170,8 @@ body {
   background-color: lightgray;
 }
 
-.message-bg {
+.message-bg,
+.promotion-dialog-bg {
   position: absolute;
   top: 0;
   left: 0;
@@ -180,10 +181,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(14, 14, 14, 0.4);
+  background-color: rgba(14, 14, 14, 0.2);
 }
 
-.message {
+.message,
+.promotion-dialog {
   position: absolute;
   z-index: 1000;
   background-color: var(--main-color-3);
@@ -192,6 +194,17 @@ body {
   color: white;
   text-transform: capitalize;
   padding: 8px 12px;
+}
+
+.promotion-dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  img {
+    cursor: pointer;
+  }
 }
 
 // only for PC

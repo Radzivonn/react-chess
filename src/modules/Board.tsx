@@ -3,7 +3,9 @@ import CellComponent from 'components/Cell';
 import { Board } from 'models/Board';
 import { Cell } from 'models/Cell';
 import { Player } from 'models/Player';
-import { Colors } from 'types/enums';
+import { Colors, FENChar } from 'types/enums';
+import { PromotionFigureDialog } from 'components/PromotionFigureDialog';
+import { Pawn } from 'models/figures/Pawn';
 
 interface BoardProps {
   board: Board;
@@ -21,28 +23,45 @@ const BoardModule: FC<BoardProps> = ({
   setGameOverMessage,
 }) => {
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
+  const [isPromotionDialogActive, setIsPromotionDialogActive] = useState(false);
+  const [promotedFigure, setPromotedFigure] = useState<FENChar>();
+  const [targetCell, setTargetCell] = useState<Cell | null>(null); // only for promotion move
 
   useEffect(() => {
     highlightCells();
   }, [selectedCell]);
 
-  const click = (cell: Cell) => {
+  useEffect(() => {
+    if (promotedFigure && targetCell) moveFigure(targetCell);
+  }, [promotedFigure]);
+
+  const moveFigure = (cell: Cell) => {
     if (currentPlayer && selectedCell && selectedCell !== cell && cell.available) {
-      board.moveFigure(selectedCell, cell);
+      if (
+        selectedCell.figure instanceof Pawn &&
+        selectedCell.figure.isPromotionMove(cell.y) &&
+        !isPromotionDialogActive
+      ) {
+        setTargetCell(cell);
+        setIsPromotionDialogActive(true);
+      } else {
+        board.moveFigure(selectedCell, cell, promotedFigure);
 
-      const nextPlayerColor = currentPlayer.color === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
-      const opponentFigures =
-        nextPlayerColor === Colors.BLACK ? board.whiteFigures : board.blackFigures;
+        const nextPlayerColor = currentPlayer.color === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
+        const opponentFigures =
+          nextPlayerColor === Colors.BLACK ? board.whiteFigures : board.blackFigures;
+        const newBoard = board.getCopyBoard(nextPlayerColor, board.isInCheck(opponentFigures));
 
-      const newBoard = board.getCopyBoard(nextPlayerColor, board.isInCheck(opponentFigures));
+        if (newBoard.isGameFinished()) setGameOverMessage(newBoard.gameOverMessage);
+        newBoard.resetCellAvailabilityFlags();
 
-      if (newBoard.isGameFinished()) setGameOverMessage(newBoard.gameOverMessage);
-
-      newBoard.resetCellAvailabilityFlags();
-
-      setBoard(newBoard);
-      setSelectedCell(null);
-      swapPlayer();
+        setBoard(newBoard);
+        setSelectedCell(null);
+        setIsPromotionDialogActive(false);
+        setPromotedFigure(undefined);
+        setTargetCell(null);
+        swapPlayer();
+      }
     } else if (cell.figure?.color === currentPlayer?.color) {
       setSelectedCell(cell);
       board.resetCellAvailabilityFlags();
@@ -71,7 +90,7 @@ const BoardModule: FC<BoardProps> = ({
             <React.Fragment key={index}>
               {row.map((cell) => (
                 <CellComponent
-                  click={click}
+                  click={moveFigure}
                   cell={cell}
                   key={cell.id}
                   selected={cell.x === selectedCell?.x && cell.y === selectedCell?.y}
@@ -84,6 +103,13 @@ const BoardModule: FC<BoardProps> = ({
               <li key={symbol}>{symbol}</li>
             ))}
           </ul>
+          {isPromotionDialogActive && !promotedFigure && currentPlayer && (
+            <PromotionFigureDialog
+              color={currentPlayer?.color}
+              setIsPromotionDialogActive={setIsPromotionDialogActive}
+              selectPromotedFigure={setPromotedFigure}
+            />
+          )}
         </div>
       </div>
     </div>
