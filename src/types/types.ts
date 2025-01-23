@@ -1,6 +1,11 @@
 import { Figure } from 'models/figures/Figure';
 import { FENChar, MoveType } from 'types/enums';
 
+export type Coords = {
+  x: number;
+  y: number;
+};
+
 export type MoveList = [string, string?][];
 
 export type LastMove = {

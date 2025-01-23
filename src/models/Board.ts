@@ -1,7 +1,7 @@
 import { Cell } from './Cell';
 import { FENConverter } from './FENConverter';
 import { Colors, FENChar, MoveType } from 'types/enums';
-import { columns, LastMove, MoveList } from 'types/types';
+import { columns, Coords, LastMove, MoveList } from 'types/types';
 import { Pawn } from './figures/Pawn';
 import { King } from './figures/King';
 import { Queen } from './figures/Queen';
@@ -11,7 +11,7 @@ import { Rook } from './figures/Rook';
 import { Figure } from './figures/Figure';
 
 export class Board {
-  private fullNumberOfMoves: number = 1;
+  private fullNumberOfMoves: number = 0;
   private fiftyMoveRuleCounter: number = 0;
   private threeFoldRepetitionDictionary = new Map<string, number>();
   private threeFoldRepetitionFlag: boolean = false;
@@ -35,7 +35,7 @@ export class Board {
   gameOverMessage: string | null = null;
   moveList: MoveList = [];
 
-  public initCells() {
+  public initCells(): void {
     for (let y = 0; y < 8; y++) {
       const row: Cell[] = [];
       for (let x = 0; x < 8; x++) {
@@ -49,7 +49,7 @@ export class Board {
     }
   }
 
-  public getCell(x: number, y: number) {
+  public getCell(x: number, y: number): Cell {
     return this.cells[y][x];
   }
 
@@ -80,6 +80,7 @@ export class Board {
     newBoard.boardAsFEN = this.boardAsFEN;
     newBoard.threeFoldRepetitionFlag = this.threeFoldRepetitionFlag;
     newBoard.gameOverMessage = this.gameOverMessage;
+    newBoard.moveList = this.moveList;
     /* заменить на глубокое копирование объекта */
     return newBoard;
   }
@@ -125,7 +126,7 @@ export class Board {
     return bishops.length === figures.length - 1 && areAllBishopsOfSameColor;
   }
 
-  private insufficientMaterial() {
+  private insufficientMaterial(): boolean {
     // King vs King
     if (this.blackFigures.length === 1 && this.whiteFigures.length === 1) return true;
 
@@ -180,14 +181,19 @@ export class Board {
     return false;
   }
 
-  isStalemate() {
+  isStalemate(): boolean {
     if (!this.checkState) {
       for (let y = 0; y < this.cells.length; y++) {
         const row = this.cells[y];
         for (let x = 0; x < row.length; x++) {
-          const target = row[x];
-          if (target.figure?.color === this.currentPlayerColor && this.countAvailableCells(target))
+          const cell = row[x];
+
+          if (
+            cell.figure?.color === this.currentPlayerColor &&
+            this.countAvailableCells(cell).length > 0
+          ) {
             return false;
+          }
         }
       }
       return true;
@@ -195,13 +201,17 @@ export class Board {
     return false;
   }
 
-  isCheckMate() {
+  isCheckMate(): boolean {
     if (this.checkState) {
       for (let y = 0; y < this.cells.length; y++) {
         const row = this.cells[y];
         for (let x = 0; x < row.length; x++) {
           const cell = row[x];
-          if (cell.figure?.color === this.currentPlayerColor && this.countAvailableCells(cell))
+
+          if (
+            cell.figure?.color === this.currentPlayerColor &&
+            this.countAvailableCells(cell).length > 0
+          )
             return false;
         }
       }
@@ -210,7 +220,7 @@ export class Board {
     return false;
   }
 
-  isInCheck(opponentFigures: Figure[]) {
+  isInCheck(opponentFigures: Figure[]): boolean {
     for (const figure of opponentFigures) {
       const isPawn = figure instanceof Pawn;
       for (let y = 0; y < this.cells.length; y++) {
@@ -231,7 +241,7 @@ export class Board {
     return false;
   }
 
-  isPositionSafeAfterMove(currentCell: Cell, targetCell: Cell) {
+  isPositionSafeAfterMove(currentCell: Cell, targetCell: Cell): boolean {
     if (!currentCell.figure) return false;
 
     const currentFigureClone = currentCell.figure.clone();
@@ -255,28 +265,31 @@ export class Board {
     return !isInCheck;
   }
 
-  countAvailableCells(selectedCell: Cell) {
-    let hasAvailableCells = false;
+  countAvailableCells(selectedCell: Cell): Coords[] {
+    const availableCells: Coords[] = [];
+
     for (let y = 0; y < this.cells.length; y++) {
       const row = this.cells[y];
+
       for (let x = 0; x < row.length; x++) {
         const target = row[x];
         const isFigureCanMove = !!selectedCell?.figure?.canMove(this, target);
 
         if (isFigureCanMove && this.isPositionSafeAfterMove(selectedCell, target)) {
           target.available = true;
-          hasAvailableCells = true;
+          availableCells.push({ x: target.x, y: target.y });
         }
       }
     }
-    return hasAvailableCells;
+
+    return availableCells;
   }
 
-  public highlightCells(selectedCell: Cell) {
+  public highlightCells(selectedCell: Cell): void {
     if (selectedCell.figure) this.countAvailableCells(selectedCell);
   }
 
-  private addLostFigure(figure: Figure) {
+  private addLostFigure(figure: Figure): void {
     if (figure.color === Colors.BLACK) {
       this.lostBlackFigures.push(figure);
       this.blackFigures.splice(
@@ -292,7 +305,7 @@ export class Board {
     }
   }
 
-  private castle(king: King, kingSideCastle: boolean) {
+  private castle(king: King, kingSideCastle: boolean): void {
     const rookDirection = kingSideCastle ? -1 : 1;
     const rookX = kingSideCastle ? 7 : 0;
     const rook =
@@ -302,6 +315,9 @@ export class Board {
 
     if (rook) {
       this.moveFigure(this.getCell(rook.x, rook.y), this.getCell(king.x + rookDirection, rook.y));
+      this.moveList[this.moveList.length - 1].pop();
+      this.fiftyMoveRuleCounter -= 0.5;
+      if (this.currentPlayerColor === Colors.WHITE) this.fullNumberOfMoves--;
     }
   }
 
@@ -323,7 +339,7 @@ export class Board {
     return new Queen(x, y, this.currentPlayerColor, id);
   }
 
-  public moveFigure(currentCell: Cell, target: Cell, promotedFigure?: FENChar) {
+  public moveFigure(currentCell: Cell, target: Cell, promotedFigure?: FENChar): Board {
     let currentFigure = currentCell.figure;
 
     if (!currentFigure) return this;
@@ -451,7 +467,7 @@ export class Board {
 
     if (moveType.has(MoveType.Castling)) move = figure.x - prevX === 2 ? 'O-O' : 'O-O-O';
     else {
-      move = figureName + columns[prevX] + String(this.ROWS_NUMBERS[prevY]);
+      move = figureName + this.startingPieceCoordsNotation();
       if (moveType.has(MoveType.Capture))
         move += figure instanceof Pawn ? columns[prevY] + 'x' : 'x';
       move += columns[figure.x] + String(this.ROWS_NUMBERS[figure.y]);
@@ -465,8 +481,41 @@ export class Board {
     if (!this.moveList[this.fullNumberOfMoves - 1])
       this.moveList[this.fullNumberOfMoves - 1] = [move];
     else this.moveList[this.fullNumberOfMoves - 1].push(move);
+  }
 
-    console.log('move ', this.moveList.length - 1, ' = ', move);
+  private startingPieceCoordsNotation(): string {
+    const { figure: currentFigure, prevX, prevY } = this.lastMove!;
+    if (currentFigure instanceof Pawn || currentFigure instanceof King) return '';
+
+    const samePiecesCoords: Coords[] = [{ x: prevX, y: prevY }];
+
+    const figures = [...this.whiteFigures, ...this.blackFigures];
+
+    for (const figure of figures) {
+      if (currentFigure.x === figure.x && currentFigure.y === figure.y) continue;
+
+      if (figure.FENChar === currentFigure.FENChar) {
+        const safeSquares: Coords[] = this.countAvailableCells(this.getCell(figure.x, figure.y));
+        const figureHasSameTargetSquare: boolean = safeSquares.some(
+          (coords) => coords.x === currentFigure.x && coords.y === currentFigure.y,
+        );
+        if (figureHasSameTargetSquare) samePiecesCoords.push({ x: figure.x, y: figure.y });
+      }
+    }
+
+    if (samePiecesCoords.length === 1) return '';
+
+    const piecesFile = new Set(samePiecesCoords.map((coords) => coords.y));
+    const piecesRank = new Set(samePiecesCoords.map((coords) => coords.x));
+
+    // means that all of the pieces are on different files (a, b, c, ...)
+    if (piecesFile.size === samePiecesCoords.length) return columns[prevY];
+
+    // means that all of the pieces are on different rank (1, 2, 3, ...)
+    if (piecesRank.size === samePiecesCoords.length) return String(prevX + 1);
+
+    // in case that there are pieces that shares both rank and a file with multiple or one piece
+    return columns[prevY] + String(prevX + 1);
   }
 
   isEmptyVertical(currentX: number, currentY: number, targetX: number, targetY: number): boolean {
