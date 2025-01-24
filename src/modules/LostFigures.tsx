@@ -1,19 +1,16 @@
 import React, { FC } from 'react';
 import { Figure } from 'models/figures/Figure';
 
-interface LostFiguresProps {
-  title: string;
+interface Props {
   figures: Figure[];
+  className?: string;
 }
 
-const LostFigures: FC<LostFiguresProps> = ({ title, figures }) => {
+const LostFigures: FC<Props> = ({ figures, className }) => {
   return (
-    <div className="lost">
-      <h3>{title}</h3>
+    <div className={`lost-figures ${className}`}>
       {figures.map((figure) => (
-        <div key={figure.id}>
-          {figure.name} {figure.logo && <img width={20} height={20} src={figure.logo} />}
-        </div>
+        <div key={figure.id}>{figure.logo && <img width="32" height="32" src={figure.logo} />}</div>
       ))}
     </div>
   );

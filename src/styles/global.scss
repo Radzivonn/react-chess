@@ -67,34 +67,45 @@ body {
 
 .app {
   width: 100vw;
-  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .board {
-  display: flex;
+  max-width: 670px;
+  display: grid;
+
+  grid-template-areas:
+    't t t'
+    'l c c'
+    'l d d'
+    'b b b';
 
   .cells-block {
     width: calc(80px * 8);
     height: calc(80px * 8);
     display: flex;
-    // flex-direction: column;
     flex-wrap: wrap;
+    grid-area: c;
   }
 
   .symbols {
     display: flex;
     justify-content: space-around;
+    align-items: center;
     font-size: 24px;
     color: var(--cell-light-color);
     margin-right: 12px;
     &.rows-numbers {
+      grid-area: l;
+      justify-content: initial;
       flex-direction: column;
+      gap: 6.75%;
+      margin-top: 100%;
     }
     &.columns-letters {
-      flex-direction: row;
+      grid-area: d;
       width: inherit;
       margin: 0;
     }
@@ -163,11 +174,19 @@ body {
   background-color: var(--cell-selected-color);
 }
 
-.lost {
-  height: calc(50vh - 60px);
-  padding: 30px;
-  margin-left: 50px;
-  background-color: lightgray;
+.lost-figures {
+  min-height: 36px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 8px 0 0 28px;
+  background-color: transparent;
+  &.area-top {
+    grid-area: t;
+  }
+  &.area-bottom {
+    grid-area: b;
+  }
 }
 
 .message-bg,

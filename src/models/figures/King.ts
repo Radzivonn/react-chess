@@ -28,7 +28,7 @@ export class King extends Figure {
     }
     // king side castle
     if (this.y === target.y && this.x - target.x === -2 && this.canCastle(board, true)) return true;
-    // non king side castle
+    // queen side castle
     if (this.y === target.y && this.x - target.x === 2 && this.canCastle(board, false)) return true;
     return false;
   }

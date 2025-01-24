@@ -35,7 +35,12 @@ export class Board {
   gameOverMessage: string | null = null;
   moveList: MoveList = [];
 
-  public initCells(): void {
+  public restartGame(): void {
+    this.initCells();
+    this.addFigures();
+  }
+
+  private initCells(): void {
     for (let y = 0; y < 8; y++) {
       const row: Cell[] = [];
       for (let x = 0; x < 8; x++) {
@@ -63,24 +68,28 @@ export class Board {
     }
   }
 
+  /**
+   * Returns a deep copy of the board instance,
+   * creating it anew and transferring all the necessary fields from the old instance
+   */
   public getCopyBoard(playerColor: Colors): Board {
     const newBoard = new Board();
     /* заменить на глубокое копирование объекта */
     newBoard.currentPlayerColor = playerColor;
     newBoard.checkState = this.checkState;
     newBoard.cells = this.cells;
-    newBoard.lostWhiteFigures = this.lostWhiteFigures;
-    newBoard.lostBlackFigures = this.lostBlackFigures;
     newBoard.blackFigures = this.blackFigures;
     newBoard.whiteFigures = this.whiteFigures;
+    newBoard.lostBlackFigures = this.lostBlackFigures;
+    newBoard.lostWhiteFigures = this.lostWhiteFigures;
     newBoard.lastMove = this.lastMove;
+    newBoard.gameOverMessage = this.gameOverMessage;
+    newBoard.moveList = this.moveList;
     newBoard.fullNumberOfMoves = this.fullNumberOfMoves;
     newBoard.fiftyMoveRuleCounter = this.fiftyMoveRuleCounter;
     newBoard.threeFoldRepetitionDictionary = this.threeFoldRepetitionDictionary;
-    newBoard.boardAsFEN = this.boardAsFEN;
     newBoard.threeFoldRepetitionFlag = this.threeFoldRepetitionFlag;
-    newBoard.gameOverMessage = this.gameOverMessage;
-    newBoard.moveList = this.moveList;
+    newBoard.boardAsFEN = this.boardAsFEN;
     /* заменить на глубокое копирование объекта */
     return newBoard;
   }
@@ -483,6 +492,13 @@ export class Board {
     else this.moveList[this.fullNumberOfMoves - 1].push(move);
   }
 
+  /**
+   * Function returns coordinates according to chess algebraic notation.
+   * Pieces of the same type as the selected one are checked and whether they can move to the same squares as the selected piece.
+   * According to chess algebraic notation,
+   * if there are intersections of cells “available” for movement for several figures of the same type,
+   * then the function returns the corresponding coordinates of the specific figure that makes the move.
+   */
   private startingPieceCoordsNotation(): string {
     const { figure: currentFigure, prevX, prevY } = this.lastMove!;
     if (currentFigure instanceof Pawn || currentFigure instanceof King) return '';
@@ -508,13 +524,13 @@ export class Board {
     const piecesFile = new Set(samePiecesCoords.map((coords) => coords.y));
     const piecesRank = new Set(samePiecesCoords.map((coords) => coords.x));
 
-    // means that all of the pieces are on different files (a, b, c, ...)
+    // means that all of the pieces are on different verticals (a, b, c, ...)
     if (piecesFile.size === samePiecesCoords.length) return columns[prevY];
 
-    // means that all of the pieces are on different rank (1, 2, 3, ...)
+    // means that all of the pieces are on different horizontals (1, 2, 3, ...)
     if (piecesRank.size === samePiecesCoords.length) return String(prevX + 1);
 
-    // in case that there are pieces that shares both rank and a file with multiple or one piece
+    // in case that there are pieces that shares both verticals and horizontals with multiple or one piece
     return columns[prevY] + String(prevX + 1);
   }
 
@@ -637,7 +653,7 @@ export class Board {
     this.whiteFigures.push(whiteRook.clone(), whiteRook2.clone());
   }
 
-  public addFigures() {
+  private addFigures() {
     this.addKings();
     this.addQueens();
     this.addBishops();

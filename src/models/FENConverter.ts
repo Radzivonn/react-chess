@@ -7,7 +7,7 @@ import { Pawn } from './figures/Pawn';
 import { Cell } from './Cell';
 
 export class FENConverter {
-  public static readonly initalPosition: string =
+  public static readonly initialPosition: string =
     'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
   public convertBoardToFEN(

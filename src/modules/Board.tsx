@@ -6,6 +6,7 @@ import { Player } from 'models/Player';
 import { FENChar } from 'types/enums';
 import { PromotionFigureDialog } from 'components/PromotionFigureDialog';
 import { Pawn } from 'models/figures/Pawn';
+import LostFigures from 'modules/LostFigures';
 
 interface BoardProps {
   board: Board;
@@ -70,41 +71,40 @@ const BoardModule: FC<BoardProps> = ({
   };
 
   return (
-    <div>
-      <h3>Current Player {currentPlayer?.color}</h3>
-      <div className="board">
-        <ul className="symbols rows-numbers">
-          {board.ROWS_NUMBERS.map((num) => (
-            <li key={num}>{num}</li>
-          ))}
-        </ul>
-        <div className="cells-block">
-          {board.cells.map((row, index) => (
-            <React.Fragment key={index}>
-              {row.map((cell) => (
-                <CellComponent
-                  click={moveFigure}
-                  cell={cell}
-                  key={cell.id}
-                  selected={cell.x === selectedCell?.x && cell.y === selectedCell?.y}
-                />
-              ))}
-            </React.Fragment>
-          ))}
-          <ul className="symbols columns-letters">
-            {board.COLUMNS_LETTERS.map((symbol) => (
-              <li key={symbol}>{symbol}</li>
+    <div className="board">
+      <LostFigures figures={board.lostWhiteFigures} className="area-top" />
+      <ul className="symbols rows-numbers">
+        {board.ROWS_NUMBERS.map((num) => (
+          <li key={num}>{num}</li>
+        ))}
+      </ul>
+      <div className="cells-block">
+        {board.cells.map((row, index) => (
+          <React.Fragment key={index}>
+            {row.map((cell) => (
+              <CellComponent
+                click={moveFigure}
+                cell={cell}
+                key={cell.id}
+                selected={cell.x === selectedCell?.x && cell.y === selectedCell?.y}
+              />
             ))}
-          </ul>
-          {isPromotionDialogActive && !promotedFigure && currentPlayer && (
-            <PromotionFigureDialog
-              color={currentPlayer?.color}
-              setIsPromotionDialogActive={setIsPromotionDialogActive}
-              selectPromotedFigure={setPromotedFigure}
-            />
-          )}
-        </div>
+          </React.Fragment>
+        ))}
       </div>
+      <ul className="symbols columns-letters">
+        {board.COLUMNS_LETTERS.map((symbol) => (
+          <li key={symbol}>{symbol}</li>
+        ))}
+      </ul>
+      <LostFigures figures={board.lostBlackFigures} className="area-bottom" />
+      {isPromotionDialogActive && !promotedFigure && currentPlayer && (
+        <PromotionFigureDialog
+          color={currentPlayer?.color}
+          setIsPromotionDialogActive={setIsPromotionDialogActive}
+          selectPromotedFigure={setPromotedFigure}
+        />
+      )}
     </div>
   );
 };
