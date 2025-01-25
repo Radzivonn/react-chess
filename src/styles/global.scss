@@ -11,6 +11,23 @@ body {
   @apply flex flex-col overflow-x-hidden scroll-smooth;
 }
 
+.button {
+  width: 120px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: var(--cell-light-color);
+  color: var(--main-color-3);
+  font-size: 20px;
+  font-weight: 500;
+  &:hover {
+    background-color: var(--cell-selected-color);
+  }
+  &:active {
+    background-color: var(--cell-dark-color);
+    color: var(--cell-light-color);
+  }
+}
+
 #root {
   @apply flex grow flex-col;
 }
@@ -67,9 +84,14 @@ body {
 
 .app {
   width: 100vw;
+  overflow: hidden;
+  padding: 6px 0;
+}
+
+.game {
+  width: 100%;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: space-evenly;
 }
 
 .board {
@@ -187,6 +209,55 @@ body {
   &.area-bottom {
     grid-area: b;
   }
+}
+
+.timer {
+  width: 90%;
+  height: 40px;
+  font-size: 24px;
+  text-align: center;
+  border-radius: 8px;
+  background-color: var(--cell-light-color);
+  color: var(--main-color-3);
+  font-weight: 500;
+}
+
+.move-table {
+  width: 300px;
+  max-height: 658px;
+  min-height: 40px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 42px;
+  overflow-y: scroll;
+}
+
+.move-table__row {
+  width: 100%;
+  display: flex;
+}
+
+.move-table__column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45%;
+  max-height: 30px;
+  background-color: var(--main-color-3);
+  color: var(--cell-light-color);
+  font-size: large;
+  font-weight: 500;
+  border: 1px solid;
+  cursor: pointer;
+  &:hover {
+    background-color: var(--cell-selected-color);
+    color: var(--main-color-3);
+  }
+}
+
+.move-table__column--row-number {
+  @extend .move-table__column;
+  width: 10%;
 }
 
 .message-bg,

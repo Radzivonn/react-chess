@@ -58,12 +58,14 @@ const Timer: FC<TimerProps> = ({ isStopped, currentPlayer, restart }) => {
   };
 
   return (
-    <div>
+    <div className="flex flex-col gap-72 self-center">
+      <h2 className="timer">{convertTime(blackTime)}</h2>
       <div className="relative z-[500]">
-        <button onClick={handleRestart}>Restart game</button>
+        <button className="button" onClick={handleRestart}>
+          Restart
+        </button>
       </div>
-      <h2>Black - {convertTime(blackTime)}</h2>
-      <h2>White - {convertTime(whiteTime)}</h2>
+      <h2 className="timer">{convertTime(whiteTime)}</h2>
     </div>
   );
 };
