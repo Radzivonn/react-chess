@@ -1,7 +1,7 @@
 import { Cell } from './Cell';
 import { FENConverter } from './FENConverter';
 import { Colors, FENChar, MoveType } from 'types/enums';
-import { columns, Coords, LastMove, MoveList } from 'types/types';
+import { columns, Coords, GameHistory, LastMove, MoveList } from 'types/types';
 import { Pawn } from './figures/Pawn';
 import { King } from './figures/King';
 import { Queen } from './figures/Queen';
@@ -34,10 +34,22 @@ export class Board {
   lastMove: LastMove | null = null;
   gameOverMessage: string | null = null;
   moveList: MoveList = [];
+  gameHistory: GameHistory = [];
+
+  public get chessBoardView(): (FENChar | null)[][] {
+    return this.cells.map((row) => {
+      return row.map((cell) => (cell.figure instanceof Figure ? cell.figure.FENChar : null));
+    });
+  }
 
   public restartGame(): void {
     this.initCells();
     this.addFigures();
+    this.gameHistory.push({
+      board: this.chessBoardView,
+      lastMove: this.lastMove,
+      checkState: this.checkState,
+    });
   }
 
   private initCells(): void {
@@ -90,6 +102,7 @@ export class Board {
     newBoard.threeFoldRepetitionDictionary = this.threeFoldRepetitionDictionary;
     newBoard.threeFoldRepetitionFlag = this.threeFoldRepetitionFlag;
     newBoard.boardAsFEN = this.boardAsFEN;
+    newBoard.gameHistory = this.gameHistory;
     /* заменить на глубокое копирование объекта */
     return newBoard;
   }
@@ -447,6 +460,7 @@ export class Board {
     };
 
     newBoard.storeMove(promotedFigure);
+    newBoard.updateGameHistory();
 
     newBoard.resetCellAvailabilityFlags();
     return newBoard;
@@ -535,6 +549,14 @@ export class Board {
 
     // in case that there are pieces that shares both verticals and horizontals with multiple or one piece
     return columns[prevY] + String(prevX + 1);
+  }
+
+  private updateGameHistory(): void {
+    this.gameHistory.push({
+      board: [...this.chessBoardView.map((row) => [...row])],
+      checkState: this.checkState,
+      lastMove: this.lastMove ? { ...this.lastMove } : null,
+    });
   }
 
   isEmptyVertical(currentX: number, currentY: number, targetX: number, targetY: number): boolean {
