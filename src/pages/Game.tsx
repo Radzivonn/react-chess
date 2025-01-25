@@ -5,6 +5,7 @@ import { Colors } from 'types/enums';
 import BoardModule from 'modules/Board';
 import Timer from 'modules/Timer';
 import { FinishGameMessage } from 'components/FinishGameMessage';
+import MoveTable from 'modules/MoveTable';
 
 const Game = () => {
   const [board, setBoard] = useState(new Board());
@@ -30,7 +31,7 @@ const Game = () => {
   };
 
   return (
-    <div className="app">
+    <div className="game">
       <Timer isStopped={!!gameOverMessage} restart={restart} currentPlayer={currentPlayer} />
       <BoardModule
         board={board}
@@ -39,6 +40,7 @@ const Game = () => {
         swapPlayer={swapPlayer}
         setGameOverMessage={setGameOverMessage}
       />
+      <MoveTable moves={board.moveList} />
       {!!gameOverMessage && <FinishGameMessage message={gameOverMessage} />}
     </div>
   );
