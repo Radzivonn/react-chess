@@ -2,13 +2,9 @@ import { Figure } from './Figure';
 import { Board } from 'models/Board';
 import { Colors, FENChar } from 'types/enums';
 import { Cell } from '../Cell';
-import blackLogo from 'assets/black-knight.svg';
-import whiteLogo from 'assets/white-knight.svg';
-
 export class Knight extends Figure {
   constructor(x: number, y: number, color: Colors, id?: number) {
     super(x, y, color, id);
-    this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
     this.FENChar = color === Colors.WHITE ? FENChar.WhiteKnight : FENChar.BlackKnight;
   }
 

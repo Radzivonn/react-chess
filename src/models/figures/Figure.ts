@@ -1,6 +1,5 @@
 import { Colors, FENChar } from 'types/enums';
 import { Cell } from '../Cell';
-import logo from 'assets/black-king.svg';
 import { Board } from 'models/Board';
 
 export class Figure {
@@ -9,13 +8,11 @@ export class Figure {
   x: number;
   y: number;
   FENChar: FENChar | null = null;
-  logo: typeof logo | null;
 
   constructor(x: number, y: number, color: Colors, id = Math.random()) {
     this.x = x;
     this.y = y;
     this.color = color;
-    this.logo = null;
     this.id = id;
   }
 

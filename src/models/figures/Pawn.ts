@@ -2,8 +2,6 @@ import { Figure } from './Figure';
 import { Board } from 'models/Board';
 import { Colors, FENChar } from 'types/enums';
 import { Cell } from '../Cell';
-import blackLogo from 'assets/black-pawn.svg';
-import whiteLogo from 'assets/white-pawn.svg';
 import { LastMove } from 'types/types';
 
 type Direction = 1 | -1;
@@ -15,7 +13,6 @@ export class Pawn extends Figure {
   constructor(x: number, y: number, color: Colors, isFirstStep: boolean, id?: number) {
     super(x, y, color, id);
     this.FENChar = color === Colors.WHITE ? FENChar.WhitePawn : FENChar.BlackPawn;
-    this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
     this.isFirstStep = isFirstStep;
   }
 
@@ -64,6 +61,7 @@ export class Pawn extends Figure {
 
   canCaptureEnPassant(target: Cell, lastMove: LastMove | null): boolean {
     if (!lastMove) return false;
+
     const { figure, prevY } = lastMove;
     const direction: Direction = this.color === Colors.BLACK ? 1 : -1;
 

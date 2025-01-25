@@ -1,15 +1,12 @@
 import { Figure } from './Figure';
 import { Colors, FENChar } from 'types/enums';
 import { Cell } from '../Cell';
-import blackLogo from 'assets/black-queen.svg';
-import whiteLogo from 'assets/white-queen.svg';
 import { Board } from 'models/Board';
 
 export class Queen extends Figure {
   constructor(x: number, y: number, color: Colors, id?: number) {
     super(x, y, color, id);
     this.FENChar = color === Colors.WHITE ? FENChar.WhiteQueen : FENChar.BlackQueen;
-    this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
   }
 
   canMove(board: Board, target: Cell): boolean {

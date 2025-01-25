@@ -15,10 +15,12 @@ export type LastMove = {
   moveType: Set<MoveType>;
 };
 
-export type GameHistory = {
-  lastMove: LastMove | undefined;
+interface HistorySnapshot {
+  lastMove: LastMove | null;
   checkState: boolean;
   board: (FENChar | null)[][];
-}[];
+}
+
+export type GameHistory = HistorySnapshot[];
 
 export const columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
