@@ -441,12 +441,12 @@ export class Board {
     else if (this.checkState) moveType.add(MoveType.Check);
     else if (!moveType.size) moveType.add(MoveType.BasicMove);
 
-    this.lastMove = {
+    newBoard.lastMove = {
       ...lastMoveTemp,
       moveType,
     };
 
-    this.storeMove(promotedFigure);
+    newBoard.storeMove(promotedFigure);
 
     newBoard.resetCellAvailabilityFlags();
     return newBoard;
@@ -469,7 +469,7 @@ export class Board {
   }
 
   private storeMove(promotedFigure?: FENChar): void {
-    const { figure, prevX, prevY, moveType } = this.lastMove!;
+    const { figure, prevX, moveType } = this.lastMove!;
     const figureName =
       figure.FENChar && !(figure instanceof Pawn) ? figure.FENChar.toUpperCase() : '';
     let move = '';
@@ -477,8 +477,11 @@ export class Board {
     if (moveType.has(MoveType.Castling)) move = figure.x - prevX === 2 ? 'O-O' : 'O-O-O';
     else {
       move = figureName + this.startingPieceCoordsNotation();
-      if (moveType.has(MoveType.Capture))
-        move += figure instanceof Pawn ? columns[prevY] + 'x' : 'x';
+
+      if (moveType.has(MoveType.Capture)) {
+        move += figure instanceof Pawn ? columns[prevX] + 'x' : 'x';
+      }
+
       move += columns[figure.x] + String(this.ROWS_NUMBERS[figure.y]);
 
       if (promotedFigure) move += '=' + promotedFigure.toUpperCase();
