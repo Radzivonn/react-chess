@@ -337,6 +337,7 @@ export class Board {
 
     if (rook) {
       this.moveFigure(this.getCell(rook.x, rook.y), this.getCell(king.x + rookDirection, rook.y));
+      this.gameHistory.pop();
       this.moveList[this.moveList.length - 1].pop();
       this.fiftyMoveRuleCounter -= 0.5;
       if (this.currentPlayerColor === Colors.WHITE) this.fullNumberOfMoves--;
@@ -422,6 +423,8 @@ export class Board {
       }
     }
 
+    currentCell.figure = null;
+
     if (currentFigure instanceof King && currentCell.x - target.x === -2) {
       this.castle(currentFigure, true); // king side castle
       moveType.add(MoveType.Castling);
@@ -429,8 +432,6 @@ export class Board {
       this.castle(currentFigure, false); // queen side castle
       moveType.add(MoveType.Castling);
     }
-
-    currentCell.figure = null;
 
     if (this.currentPlayerColor === Colors.WHITE) this.fullNumberOfMoves++;
     this.boardAsFEN = this.FENConverter.convertBoardToFEN(

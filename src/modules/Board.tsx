@@ -1,5 +1,4 @@
 import React, { FC, useEffect, useState } from 'react';
-import CellComponent from 'components/Cell';
 import { Board } from 'models/Board';
 import { Cell } from 'models/Cell';
 import { Player } from 'models/Player';
@@ -7,11 +6,14 @@ import { FENChar } from 'types/enums';
 import { PromotionFigureDialog } from 'components/PromotionFigureDialog';
 import { Pawn } from 'models/figures/Pawn';
 import LostFigures from 'modules/LostFigures';
+import CellsModule from 'modules/CellsModule';
+import DummyCellsModule from 'modules/DummyCellsModule';
 
 interface BoardProps {
   board: Board;
   setBoard: (board: Board) => void;
   currentPlayer: Player | null;
+  selectedMoveIndex: number | null;
   swapPlayer: () => void;
   setGameOverMessage: (gameOverMessage: string | null) => void;
 }
@@ -20,6 +22,7 @@ const BoardModule: FC<BoardProps> = ({
   board,
   setBoard,
   currentPlayer,
+  selectedMoveIndex,
   swapPlayer,
   setGameOverMessage,
 }) => {
@@ -78,20 +81,11 @@ const BoardModule: FC<BoardProps> = ({
           <li key={num}>{num}</li>
         ))}
       </ul>
-      <div className="cells-block">
-        {board.cells.map((row, index) => (
-          <React.Fragment key={index}>
-            {row.map((cell) => (
-              <CellComponent
-                click={moveFigure}
-                cell={cell}
-                key={cell.id}
-                selected={cell.x === selectedCell?.x && cell.y === selectedCell?.y}
-              />
-            ))}
-          </React.Fragment>
-        ))}
-      </div>
+      {selectedMoveIndex ? (
+        <DummyCellsModule boardState={board.gameHistory[selectedMoveIndex].board} />
+      ) : (
+        <CellsModule board={board} selectedCell={selectedCell} moveFigure={moveFigure} />
+      )}
       <ul className="symbols columns-letters">
         {board.COLUMNS_LETTERS.map((symbol) => (
           <li key={symbol}>{symbol}</li>

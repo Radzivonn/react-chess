@@ -249,7 +249,8 @@ body {
   font-weight: 500;
   border: 1px solid;
   cursor: pointer;
-  &:hover {
+  &:hover,
+  &.active {
     background-color: var(--cell-selected-color);
     color: var(--main-color-3);
   }

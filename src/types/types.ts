@@ -15,10 +15,12 @@ export type LastMove = {
   moveType: Set<MoveType>;
 };
 
-interface HistorySnapshot {
+export type boardFENCharState = (FENChar | null)[][];
+
+export interface HistorySnapshot {
   lastMove: LastMove | null;
   checkState: boolean;
-  board: (FENChar | null)[][];
+  board: boardFENCharState;
 }
 
 export type GameHistory = HistorySnapshot[];
