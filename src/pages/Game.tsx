@@ -12,6 +12,7 @@ const Game = () => {
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [gameOverMessage, setGameOverMessage] = useState<string | null>(null);
   const [selectedMoveIndex, setSelectedMoveIndex] = useState<number>(0);
+  const [isGameStarted, setIsGameStarted] = useState(false);
 
   useEffect(() => {
     restart();
@@ -24,6 +25,7 @@ const Game = () => {
     setCurrentPlayer(new Player(Colors.WHITE));
     setGameOverMessage(null);
     setSelectedMoveIndex(0);
+    setIsGameStarted(false);
   };
 
   const swapPlayer = () => {
@@ -32,6 +34,7 @@ const Game = () => {
         currentPlayer?.color === Colors.WHITE ? new Player(Colors.BLACK) : new Player(Colors.WHITE),
       );
       setSelectedMoveIndex(board.gameHistory.length - 1);
+      if (!isGameStarted) setIsGameStarted(true);
     }
   };
 
@@ -39,7 +42,7 @@ const Game = () => {
     board && (
       <div className="game">
         <Timer
-          isStopped={!!gameOverMessage}
+          isStopped={!!gameOverMessage || !isGameStarted}
           currentPlayer={currentPlayer}
           restart={restart}
           setGameOverMessage={setGameOverMessage}
