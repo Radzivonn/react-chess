@@ -38,7 +38,12 @@ const Game = () => {
   return (
     board && (
       <div className="game">
-        <Timer isStopped={!!gameOverMessage} restart={restart} currentPlayer={currentPlayer} />
+        <Timer
+          isStopped={!!gameOverMessage}
+          currentPlayer={currentPlayer}
+          restart={restart}
+          setGameOverMessage={setGameOverMessage}
+        />
         <BoardModule
           board={board}
           setBoard={setBoard}

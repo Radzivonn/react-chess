@@ -6,9 +6,10 @@ interface TimerProps {
   isStopped: boolean;
   currentPlayer: Player | null;
   restart: () => void;
+  setGameOverMessage: (gameOverMessage: string | null) => void;
 }
 
-const GAME_TIME = 600; // (10 minutes) in seconds
+const GAME_TIME = 300; // (5 minutes) in seconds
 
 /* convert time to mm:ss format */
 const convertTime = (allTimeInSeconds: number) => {
@@ -17,7 +18,7 @@ const convertTime = (allTimeInSeconds: number) => {
   return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
 };
 
-const Timer: FC<TimerProps> = ({ isStopped, currentPlayer, restart }) => {
+const Timer: FC<TimerProps> = ({ isStopped, currentPlayer, restart, setGameOverMessage }) => {
   const [blackTime, setBlackTime] = useState(GAME_TIME);
   const [whiteTime, setWhiteTime] = useState(GAME_TIME);
   const timer = useRef<null | ReturnType<typeof setInterval>>(null);
@@ -29,6 +30,11 @@ const Timer: FC<TimerProps> = ({ isStopped, currentPlayer, restart }) => {
   useEffect(() => {
     startTimer();
   }, [currentPlayer, isStopped]);
+
+  useEffect(() => {
+    if (whiteTime === 0) setGameOverMessage('Black won by time');
+    else if (blackTime === 0) setGameOverMessage('White won by time');
+  }, [whiteTime, blackTime]);
 
   const startTimer = () => {
     if (timer.current) clearInterval(timer.current);
