@@ -3,7 +3,7 @@ export enum Colors {
   BLACK = 'black',
 }
 
-export enum FENChar {
+export const enum FENChar {
   WhitePawn = 'P',
   WhiteKnight = 'N',
   WhiteBishop = 'B',
@@ -17,6 +17,23 @@ export enum FENChar {
   BlackQueen = 'q',
   BlackKing = 'k',
 }
+
+type FigureCost = 0 | -1 | 1 | -3 | 3 | -5 | 5 | -9 | 9;
+
+export const figureCosts: Readonly<Record<FENChar, FigureCost>> = {
+  [FENChar.WhitePawn]: 1,
+  [FENChar.WhiteKnight]: 3,
+  [FENChar.WhiteBishop]: 3,
+  [FENChar.WhiteRook]: 5,
+  [FENChar.WhiteQueen]: 9,
+  [FENChar.WhiteKing]: 0,
+  [FENChar.BlackPawn]: -1,
+  [FENChar.BlackKnight]: -3,
+  [FENChar.BlackBishop]: -3,
+  [FENChar.BlackRook]: -5,
+  [FENChar.BlackQueen]: -9,
+  [FENChar.BlackKing]: 0,
+};
 
 export const figureImagePaths: Readonly<Record<FENChar, string>> = {
   [FENChar.WhitePawn]: '/src/assets/white-pawn.svg',
@@ -33,7 +50,7 @@ export const figureImagePaths: Readonly<Record<FENChar, string>> = {
   [FENChar.BlackKing]: '/src/assets/black-king.svg',
 };
 
-export enum MoveType {
+export const enum MoveType {
   Capture,
   Castling,
   Promotion,

@@ -47,6 +47,8 @@ export class Board {
     this.addFigures();
     this.gameHistory.push({
       board: this.chessBoardView,
+      capturedBlackFigures: [],
+      capturedWhiteFigures: [],
       lastMove: this.lastMove,
       checkState: this.checkState,
     });
@@ -555,6 +557,8 @@ export class Board {
   private updateGameHistory(): void {
     this.gameHistory.push({
       board: [...this.chessBoardView.map((row) => [...row])],
+      capturedBlackFigures: [...this.lostBlackFigures.map((f) => f.FENChar as FENChar)],
+      capturedWhiteFigures: [...this.lostWhiteFigures.map((f) => f.FENChar as FENChar)],
       checkState: this.checkState,
       lastMove: this.lastMove ? { ...this.lastMove } : null,
     });

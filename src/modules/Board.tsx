@@ -2,7 +2,7 @@ import React, { FC, useEffect, useState } from 'react';
 import { Board } from 'models/Board';
 import { Cell } from 'models/Cell';
 import { Player } from 'models/Player';
-import { FENChar } from 'types/enums';
+import { FENChar, figureCosts } from 'types/enums';
 import { PromotionFigureDialog } from 'components/PromotionFigureDialog';
 import { Pawn } from 'models/figures/Pawn';
 import LostFigures from 'modules/LostFigures';
@@ -13,7 +13,7 @@ interface BoardProps {
   board: Board;
   setBoard: (board: Board) => void;
   currentPlayer: Player | null;
-  selectedMoveIndex: number | null;
+  selectedMoveIndex: number;
   swapPlayer: () => void;
   setGameOverMessage: (gameOverMessage: string | null) => void;
 }
@@ -73,15 +73,35 @@ const BoardModule: FC<BoardProps> = ({
     }
   };
 
+  /**
+   * Returns sum of figures weights.
+   * White figures have positive weights, and black figures have negative weights.
+   * If the sum is positive, then the material advantage is in the direction of White,
+   * and if it is negative - in the direction of Black.
+   */
+  const evaluate = (): number => {
+    const totalCost = board.gameHistory[selectedMoveIndex].board.reduce(
+      (cost, row) => cost + row.reduce((acc, curr) => (curr ? acc + figureCosts[curr] : acc), 0),
+      0,
+    );
+    return totalCost;
+  };
+
+  const evaluationSum = evaluate();
+
   return (
     <div className="board">
-      <LostFigures figures={board.lostWhiteFigures} className="area-top" />
+      <LostFigures
+        evaluation={evaluationSum < 0 ? evaluationSum : null}
+        figures={board.gameHistory[selectedMoveIndex].capturedWhiteFigures}
+        className="area-top"
+      />
       <ul className="symbols rows-numbers">
         {board.ROWS_NUMBERS.map((num) => (
           <li key={num}>{num}</li>
         ))}
       </ul>
-      {selectedMoveIndex ? (
+      {selectedMoveIndex < board.gameHistory.length - 1 ? (
         <DummyCellsModule boardState={board.gameHistory[selectedMoveIndex].board} />
       ) : (
         <CellsModule board={board} selectedCell={selectedCell} moveFigure={moveFigure} />
@@ -91,7 +111,11 @@ const BoardModule: FC<BoardProps> = ({
           <li key={symbol}>{symbol}</li>
         ))}
       </ul>
-      <LostFigures figures={board.lostBlackFigures} className="area-bottom" />
+      <LostFigures
+        evaluation={evaluationSum > 0 ? evaluationSum : null}
+        figures={board.gameHistory[selectedMoveIndex].capturedBlackFigures}
+        className="area-bottom"
+      />
       {isPromotionDialogActive && !promotedFigure && currentPlayer && (
         <PromotionFigureDialog
           color={currentPlayer?.color}

@@ -20,6 +20,8 @@ export type boardFENCharState = (FENChar | null)[][];
 export interface HistorySnapshot {
   lastMove: LastMove | null;
   checkState: boolean;
+  capturedWhiteFigures: FENChar[];
+  capturedBlackFigures: FENChar[];
   board: boardFENCharState;
 }
 

@@ -8,12 +8,10 @@ import { FinishGameMessage } from 'components/FinishGameMessage';
 import MoveTable from 'modules/MoveTable';
 
 const Game = () => {
-  const [board, setBoard] = useState(new Board());
-  const [whitePlayer] = useState(new Player(Colors.WHITE));
-  const [blackPlayer] = useState(new Player(Colors.BLACK));
+  const [board, setBoard] = useState<Board | null>(null);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [gameOverMessage, setGameOverMessage] = useState<string | null>(null);
-  const [selectedMoveIndex, setSelectedMoveIndex] = useState<number | null>(null);
+  const [selectedMoveIndex, setSelectedMoveIndex] = useState<number>(0);
 
   useEffect(() => {
     restart();
@@ -23,33 +21,41 @@ const Game = () => {
     const newBoard = new Board();
     newBoard.restartGame();
     setBoard(newBoard);
-    setCurrentPlayer(whitePlayer);
+    setCurrentPlayer(new Player(Colors.WHITE));
     setGameOverMessage(null);
+    setSelectedMoveIndex(0);
   };
 
   const swapPlayer = () => {
-    setCurrentPlayer(currentPlayer?.color === Colors.WHITE ? blackPlayer : whitePlayer);
+    if (board) {
+      setCurrentPlayer(
+        currentPlayer?.color === Colors.WHITE ? new Player(Colors.BLACK) : new Player(Colors.WHITE),
+      );
+      setSelectedMoveIndex(board.gameHistory.length - 1);
+    }
   };
 
   return (
-    <div className="game">
-      <Timer isStopped={!!gameOverMessage} restart={restart} currentPlayer={currentPlayer} />
-      <BoardModule
-        board={board}
-        setBoard={setBoard}
-        currentPlayer={currentPlayer}
-        selectedMoveIndex={selectedMoveIndex}
-        swapPlayer={swapPlayer}
-        setGameOverMessage={setGameOverMessage}
-      />
-      <MoveTable
-        numberOfMoves={board.gameHistory.length - 1}
-        moves={board.moveList}
-        selectedMove={selectedMoveIndex}
-        selectMove={setSelectedMoveIndex}
-      />
-      {!!gameOverMessage && <FinishGameMessage message={gameOverMessage} />}
-    </div>
+    board && (
+      <div className="game">
+        <Timer isStopped={!!gameOverMessage} restart={restart} currentPlayer={currentPlayer} />
+        <BoardModule
+          board={board}
+          setBoard={setBoard}
+          currentPlayer={currentPlayer}
+          selectedMoveIndex={selectedMoveIndex}
+          swapPlayer={swapPlayer}
+          setGameOverMessage={setGameOverMessage}
+        />
+        <MoveTable
+          numberOfMoves={board.gameHistory.length - 1}
+          moves={board.moveList}
+          selectedMove={selectedMoveIndex}
+          selectMove={setSelectedMoveIndex}
+        />
+        {!!gameOverMessage && <FinishGameMessage message={gameOverMessage} />}
+      </div>
+    )
   );
 };
 

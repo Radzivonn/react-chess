@@ -6,28 +6,27 @@ interface Props {
   moves: MoveList;
   className?: string;
   selectedMove: number | null;
-  selectMove: (moveIndex: number | null) => void;
+  selectMove: (moveIndex: number) => void;
 }
 
-const MoveTable: FC<Props> = ({ numberOfMoves, moves, className, selectedMove, selectMove }) => {
-  const selectMoveOnClick = (moveIndex: number) => {
-    selectMove(moveIndex >= numberOfMoves ? null : moveIndex);
-  };
-
+const MoveTable: FC<Props> = ({ moves, className, selectedMove, selectMove }) => {
   return (
     <div className={`move-table ${className}`}>
       {moves.map((movePair, i) => (
-        <div className="move-table__row" key={movePair[0] + movePair[1]}>
+        <div className="move-table__row" key={movePair[0] + movePair[1] + i}>
           <div className="move-table__column--row-number">{i + 1}</div>
-          {movePair.map((move, j) => (
-            <div
-              key={String() + String(j)}
-              className={`move-table__column ${2 * i + j + 1 === selectedMove ? 'active' : ''}`}
-              onClick={() => selectMoveOnClick(2 * i + j + 1)}
-            >
-              {move}
-            </div>
-          ))}
+          {movePair.map((move, j) => {
+            const moveNumber = 2 * i + j + 1;
+            return (
+              <div
+                key={moveNumber}
+                className={`move-table__column ${moveNumber === selectedMove ? 'active' : ''}`}
+                onClick={() => selectMove(moveNumber)}
+              >
+                {move}
+              </div>
+            );
+          })}
         </div>
       ))}
     </div>

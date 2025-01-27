@@ -19,7 +19,7 @@ export class FENConverter {
   ): string {
     let FEN: string = '';
 
-    for (let i = 7; i >= 0; i--) {
+    for (let i = 0; i <= 7; i++) {
       let FENRow: string = '';
       let consecutiveEmptySquaresCounter = 0;
 
@@ -37,7 +37,7 @@ export class FENConverter {
 
       if (consecutiveEmptySquaresCounter !== 0) FENRow += String(consecutiveEmptySquaresCounter);
 
-      FEN += i === 0 ? FENRow : FENRow + '/';
+      FEN += i === 7 ? FENRow : FENRow + '/';
     }
 
     const player: string = playerColor === Colors.WHITE ? 'w' : 'b';

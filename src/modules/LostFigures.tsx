@@ -1,20 +1,23 @@
 import React, { FC } from 'react';
-import { Figure } from 'models/figures/Figure';
-import { figureImagePaths } from 'types/enums';
+import { FENChar, figureCosts, figureImagePaths } from 'types/enums';
 
 interface Props {
-  figures: Figure[];
+  evaluation: number | null;
+  figures: FENChar[];
   className?: string;
 }
 
-const LostFigures: FC<Props> = ({ figures, className }) => {
+const LostFigures: FC<Props> = ({ evaluation, figures, className }) => {
   return (
     <div className={`lost-figures ${className}`}>
-      {figures.map((figure) => (
-        <div key={figure.id}>
-          {figure.FENChar && <img width="32" height="32" src={figureImagePaths[figure.FENChar]} />}
-        </div>
-      ))}
+      {evaluation && <h3> +{Math.abs(evaluation)} </h3>}
+      {figures
+        .toSorted((a, b) => Math.abs(figureCosts[b]) - Math.abs(figureCosts[a]))
+        .map((figure, i) => (
+          <div key={figure + i}>
+            <img width="32" height="32" src={figureImagePaths[figure]} />
+          </div>
+        ))}
     </div>
   );
 };
