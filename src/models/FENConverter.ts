@@ -17,10 +17,10 @@ export class FENConverter {
     fiftyMoveRuleCounter: number,
     numberOfFullMoves: number,
   ): string {
-    let FEN: string = '';
+    let FEN = '';
 
     for (let i = 0; i <= 7; i++) {
-      let FENRow: string = '';
+      let FENRow = '';
       let consecutiveEmptySquaresCounter = 0;
 
       for (const cell of board[i]) {
@@ -40,7 +40,7 @@ export class FENConverter {
       FEN += i === 7 ? FENRow : FENRow + '/';
     }
 
-    const player: string = playerColor === Colors.WHITE ? 'w' : 'b';
+    const player = playerColor === Colors.WHITE ? 'w' : 'b';
     FEN += ' ' + player;
     FEN += ' ' + this.castlingAvailability(board);
     FEN += ' ' + this.enPassantPosibility(lastMove, playerColor);
@@ -51,15 +51,15 @@ export class FENConverter {
 
   private castlingAvailability(board: Cell[][]): string {
     const castlingPossibilities = (color: Colors): string => {
-      let castlingAvailability: string = '';
+      let castlingAvailability = '';
 
-      const kingPositionX: number = color === Colors.WHITE ? 0 : 7;
-      const king: Figure | null = board[kingPositionX][4].figure;
+      const kingPositionY = color === Colors.WHITE ? 7 : 0;
+      const king: Figure | null = board[kingPositionY][4].figure;
 
       if (king instanceof King && !king.hasMoved) {
-        const rookPositionX: number = kingPositionX;
-        const kingSideRook = board[rookPositionX][7];
-        const queenSideRook = board[rookPositionX][0];
+        const rookPositionY = kingPositionY;
+        const kingSideRook = board[rookPositionY][7].figure;
+        const queenSideRook = board[rookPositionY][0].figure;
 
         if (kingSideRook instanceof Rook && !kingSideRook.hasMoved) castlingAvailability += 'k';
 
@@ -67,10 +67,11 @@ export class FENConverter {
 
         if (color === Colors.WHITE) castlingAvailability = castlingAvailability.toUpperCase();
       }
+
       return castlingAvailability;
     };
 
-    const castlingAvailability: string =
+    const castlingAvailability =
       castlingPossibilities(Colors.WHITE) + castlingPossibilities(Colors.BLACK);
     return castlingAvailability !== '' ? castlingAvailability : '-';
   }
@@ -79,9 +80,9 @@ export class FENConverter {
     if (!lastMove) return '-';
     const { figure, prevX, prevY } = lastMove;
 
-    if (figure instanceof Pawn && Math.abs(figure.x - prevX) === 2) {
-      const row: number = color === Colors.WHITE ? 6 : 3;
-      return columns[prevY] + String(row);
+    if (figure instanceof Pawn && Math.abs(figure.y - prevY) === 2) {
+      const row = color === Colors.WHITE ? 3 : 6;
+      return columns[prevX] + String(row);
     }
     return '-';
   }
