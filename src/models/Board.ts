@@ -42,6 +42,10 @@ export class Board {
     });
   }
 
+  public get boardFENFormat(): string {
+    return this.boardAsFEN;
+  }
+
   public restartGame(): void {
     this.initCells();
     this.addFigures();
@@ -436,16 +440,17 @@ export class Board {
     }
 
     if (this.currentPlayerColor === Colors.WHITE) this.fullNumberOfMoves++;
+
+    const nextPlayerColor = this.currentPlayerColor === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
     this.boardAsFEN = this.FENConverter.convertBoardToFEN(
       this.cells,
-      this.currentPlayerColor,
+      nextPlayerColor,
       this.lastMove,
       this.fiftyMoveRuleCounter,
       this.fullNumberOfMoves,
     );
     this.updateThreeFoldRepetitionDictionary(this.boardAsFEN);
 
-    const nextPlayerColor = this.currentPlayerColor === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
     const opponentFigures =
       nextPlayerColor === Colors.BLACK ? this.whiteFigures : this.blackFigures;
 
