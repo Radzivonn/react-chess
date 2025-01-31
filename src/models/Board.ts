@@ -20,7 +20,9 @@ export class Board {
 
   readonly boardOrientation: Colors = Colors.WHITE; // * temporary readonly
   readonly ROWS_NUMBERS =
-    this.boardOrientation === Colors.WHITE ? [8, 7, 6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6, 7, 8];
+    this.boardOrientation === Colors.WHITE
+      ? ['8', '7', '6', '5', '4', '3', '2', '1']
+      : ['1', '2', '3', '4', '5', '6', '7', '8'];
   readonly COLUMNS_LETTERS =
     this.boardOrientation === Colors.WHITE ? columns : columns.toReversed();
 
@@ -385,6 +387,7 @@ export class Board {
     };
     lastMoveTemp.figure.x = target.x;
     lastMoveTemp.figure.y = target.y;
+    const startFigureCoord = this.startingPieceCoordsNotation(lastMoveTemp);
     const moveType = new Set<MoveType>();
 
     if (target.figure) {
@@ -462,16 +465,16 @@ export class Board {
     else if (this.checkState) moveType.add(MoveType.Check);
     else if (!moveType.size) moveType.add(MoveType.BasicMove);
 
-    newBoard.lastMove = {
+    this.lastMove = {
       ...lastMoveTemp,
       moveType,
     };
 
-    newBoard.storeMove(promotedFigure);
-    newBoard.updateGameHistory();
+    this.storeMove(startFigureCoord, promotedFigure);
+    this.updateGameHistory();
+    this.resetCellAvailabilityFlags();
 
-    newBoard.resetCellAvailabilityFlags();
-    return newBoard;
+    return this;
   }
 
   private updateThreeFoldRepetitionDictionary(FEN: string): void {
@@ -490,7 +493,7 @@ export class Board {
     }
   }
 
-  private storeMove(promotedFigure?: FENChar): void {
+  private storeMove(startFigureCoord: string, promotedFigure?: FENChar): void {
     const { figure, prevX, moveType } = this.lastMove!;
     const figureName =
       figure.FENChar && !(figure instanceof Pawn) ? figure.FENChar.toUpperCase() : '';
@@ -498,13 +501,13 @@ export class Board {
 
     if (moveType.has(MoveType.Castling)) move = figure.x - prevX === 2 ? 'O-O' : 'O-O-O';
     else {
-      move = figureName + this.startingPieceCoordsNotation();
+      move = figureName + startFigureCoord;
 
       if (moveType.has(MoveType.Capture)) {
-        move += figure instanceof Pawn ? columns[prevX] + 'x' : 'x';
+        move += figure instanceof Pawn ? this.COLUMNS_LETTERS[prevX] + 'x' : 'x';
       }
 
-      move += columns[figure.x] + String(this.ROWS_NUMBERS[figure.y]);
+      move += this.COLUMNS_LETTERS[figure.x] + this.ROWS_NUMBERS[figure.y];
 
       if (promotedFigure) move += '=' + promotedFigure.toUpperCase();
     }
@@ -524,16 +527,17 @@ export class Board {
    * if there are intersections of cells “available” for movement for several figures of the same type,
    * then the function returns the corresponding coordinates of the specific figure that makes the move.
    */
-  private startingPieceCoordsNotation(): string {
-    const { figure: currentFigure, prevX, prevY } = this.lastMove!;
+  private startingPieceCoordsNotation(lastMove: Omit<LastMove, 'moveType'>): string {
+    const { figure: currentFigure, prevX, prevY } = lastMove;
     if (currentFigure instanceof Pawn || currentFigure instanceof King) return '';
 
     const samePiecesCoords: Coords[] = [{ x: prevX, y: prevY }];
 
-    const figures = [...this.whiteFigures, ...this.blackFigures];
+    const figures =
+      this.currentPlayerColor === Colors.WHITE ? this.whiteFigures : this.blackFigures;
 
     for (const figure of figures) {
-      if (currentFigure.x === figure.x && currentFigure.y === figure.y) continue;
+      if (currentFigure.id === figure.id) continue;
 
       if (figure.FENChar === currentFigure.FENChar) {
         const safeSquares: Coords[] = this.countAvailableCells(this.getCell(figure.x, figure.y));
@@ -546,17 +550,17 @@ export class Board {
 
     if (samePiecesCoords.length === 1) return '';
 
-    const piecesFile = new Set(samePiecesCoords.map((coords) => coords.y));
-    const piecesRank = new Set(samePiecesCoords.map((coords) => coords.x));
+    const piecesFile = new Set(samePiecesCoords.map((coords) => coords.x));
+    const piecesRank = new Set(samePiecesCoords.map((coords) => coords.y));
 
     // means that all of the pieces are on different verticals (a, b, c, ...)
-    if (piecesFile.size === samePiecesCoords.length) return columns[prevY];
+    if (piecesFile.size === samePiecesCoords.length) return this.COLUMNS_LETTERS[prevX];
 
     // means that all of the pieces are on different horizontals (1, 2, 3, ...)
-    if (piecesRank.size === samePiecesCoords.length) return String(prevX + 1);
+    if (piecesRank.size === samePiecesCoords.length) return this.ROWS_NUMBERS[prevY];
 
     // in case that there are pieces that shares both verticals and horizontals with multiple or one piece
-    return columns[prevY] + String(prevX + 1);
+    return this.COLUMNS_LETTERS[prevX] + this.ROWS_NUMBERS[prevY];
   }
 
   private updateGameHistory(): void {
