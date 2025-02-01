@@ -89,7 +89,7 @@ export class Board {
   }
 
   /**
-   * Returns a deep copy of the board instance,
+   * Returns a copy of the board instance,
    * creating it anew and transferring all the necessary fields from the old instance
    */
   public getCopyBoard(playerColor: Colors): Board {
@@ -458,8 +458,8 @@ export class Board {
       nextPlayerColor === Colors.BLACK ? this.whiteFigures : this.blackFigures;
 
     this.checkState = this.isInCheck(opponentFigures);
-    const newBoard = this.getCopyBoard(nextPlayerColor);
-    const isGameFinished = newBoard.isGameFinished();
+    this.currentPlayerColor = nextPlayerColor;
+    const isGameFinished = this.isGameFinished();
 
     if (this.checkState && isGameFinished) moveType.add(MoveType.CheckMate);
     else if (this.checkState) moveType.add(MoveType.Check);
