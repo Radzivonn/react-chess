@@ -94,6 +94,13 @@ body {
   justify-content: space-evenly;
 }
 
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  gap: 288px;
+}
+
 .board {
   max-width: 670px;
   display: grid;
@@ -213,6 +220,7 @@ body {
 }
 
 .timer {
+  min-width: 80px;
   width: 90%;
   height: 40px;
   font-size: 24px;
@@ -224,7 +232,9 @@ body {
 }
 
 .move-table {
-  width: 300px;
+  min-width: 180px;
+  max-width: 540px;
+  width: 22%;
   max-height: 658px;
   min-height: 40px;
   display: flex;
@@ -313,5 +323,22 @@ body {
 
   ::-webkit-scrollbar-thumb {
     @apply rounded-md bg-[var(--accent-color-2-shadow-1)];
+  }
+}
+
+// only for PC
+@media (max-width: 992px) {
+  .game {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .controls {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .move-table {
+    width: 50%;
   }
 }

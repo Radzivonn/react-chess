@@ -1,6 +1,10 @@
 import { Figure } from 'models/figures/Figure';
 import { FENChar, MoveType } from 'types/enums';
 
+export interface ChildrenProps {
+  children: React.ReactNode;
+}
+
 export type Coords = {
   x: number;
   y: number;

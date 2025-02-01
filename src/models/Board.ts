@@ -88,33 +88,6 @@ export class Board {
     }
   }
 
-  /**
-   * Returns a copy of the board instance,
-   * creating it anew and transferring all the necessary fields from the old instance
-   */
-  public getCopyBoard(playerColor: Colors): Board {
-    const newBoard = new Board();
-    /* заменить на глубокое копирование объекта */
-    newBoard.currentPlayerColor = playerColor;
-    newBoard.checkState = this.checkState;
-    newBoard.cells = this.cells;
-    newBoard.blackFigures = this.blackFigures;
-    newBoard.whiteFigures = this.whiteFigures;
-    newBoard.lostBlackFigures = this.lostBlackFigures;
-    newBoard.lostWhiteFigures = this.lostWhiteFigures;
-    newBoard.lastMove = this.lastMove;
-    newBoard.gameOverMessage = this.gameOverMessage;
-    newBoard.moveList = this.moveList;
-    newBoard.fullNumberOfMoves = this.fullNumberOfMoves;
-    newBoard.fiftyMoveRuleCounter = this.fiftyMoveRuleCounter;
-    newBoard.threeFoldRepetitionDictionary = this.threeFoldRepetitionDictionary;
-    newBoard.threeFoldRepetitionFlag = this.threeFoldRepetitionFlag;
-    newBoard.boardAsFEN = this.boardAsFEN;
-    newBoard.gameHistory = this.gameHistory;
-    /* заменить на глубокое копирование объекта */
-    return newBoard;
-  }
-
   public isGameFinished(): boolean {
     if (this.insufficientMaterial()) {
       this.gameOverMessage = 'Draw due insufficient material';
@@ -348,7 +321,6 @@ export class Board {
       this.gameHistory.pop();
       this.moveList[this.moveList.length - 1].pop();
       this.fiftyMoveRuleCounter -= 0.5;
-      if (this.currentPlayerColor === Colors.WHITE) this.fullNumberOfMoves--;
     }
   }
 
@@ -442,9 +414,16 @@ export class Board {
       moveType.add(MoveType.Castling);
     }
 
-    if (this.currentPlayerColor === Colors.WHITE) this.fullNumberOfMoves++;
+    if (this.currentPlayerColor === Colors.WHITE && !moveType.has(MoveType.Castling)) {
+      this.fullNumberOfMoves++;
+    }
 
-    const nextPlayerColor = this.currentPlayerColor === Colors.BLACK ? Colors.WHITE : Colors.BLACK;
+    const nextPlayerColor = !moveType.has(MoveType.Castling)
+      ? this.currentPlayerColor === Colors.BLACK
+        ? Colors.WHITE
+        : Colors.BLACK
+      : this.currentPlayerColor;
+
     this.boardAsFEN = this.FENConverter.convertBoardToFEN(
       this.cells,
       nextPlayerColor,

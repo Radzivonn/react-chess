@@ -1,27 +1,32 @@
-import React, { FC, useEffect, useRef, useState } from 'react';
-import { Player } from 'models/Player';
+import React, { useEffect, useRef, useState } from 'react';
 import { Colors } from 'types/enums';
-
-interface TimerProps {
-  isStopped: boolean;
-  currentPlayer: Player | null;
-  restart: () => void;
-  setGameOverMessage: (gameOverMessage: string | null) => void;
-}
+import { useGameStateStore } from 'store/gameSettingsStore';
+import { Board } from 'models/Board';
+import { Player } from 'models/Player';
+import { useMoveListStore } from 'store/moveListStore';
+import convertTime from 'helpers/convertTime';
 
 const GAME_TIME = 300; // (5 minutes) in seconds
 
-/* convert time to mm:ss format */
-const convertTime = (allTimeInSeconds: number) => {
-  const minutes = Math.floor(allTimeInSeconds / 60);
-  const seconds = allTimeInSeconds % 60;
-  return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
-};
-
-const Timer: FC<TimerProps> = ({ isStopped, currentPlayer, restart, setGameOverMessage }) => {
+const Timer = () => {
   const [blackTime, setBlackTime] = useState(GAME_TIME);
   const [whiteTime, setWhiteTime] = useState(GAME_TIME);
   const timer = useRef<null | ReturnType<typeof setInterval>>(null);
+  const {
+    isGameStarted,
+    currentPlayer,
+    gameOverMessage,
+    setIsGameStarted,
+    setBoard,
+    setCurrentPlayer,
+    setGameOverMessage,
+  } = useGameStateStore();
+  const { setMoveList, setSelectedMoveIndex } = useMoveListStore();
+  const isStopped = !!gameOverMessage || !isGameStarted;
+
+  useEffect(() => {
+    restart();
+  }, []);
 
   useEffect(() => {
     stopTimer();
@@ -35,6 +40,18 @@ const Timer: FC<TimerProps> = ({ isStopped, currentPlayer, restart, setGameOverM
     if (whiteTime === 0) setGameOverMessage('Black won by time');
     else if (blackTime === 0) setGameOverMessage('White won by time');
   }, [whiteTime, blackTime]);
+
+  const restart = () => {
+    const newBoard = new Board();
+    newBoard.restartGame();
+    setIsGameStarted(false);
+    setBoard(newBoard);
+    setCurrentPlayer(new Player(Colors.WHITE));
+    setGameOverMessage(null);
+    setSelectedMoveIndex(0);
+    setIsGameStarted(false);
+    setMoveList([]);
+  };
 
   const startTimer = () => {
     if (timer.current) clearInterval(timer.current);
@@ -64,7 +81,7 @@ const Timer: FC<TimerProps> = ({ isStopped, currentPlayer, restart, setGameOverM
   };
 
   return (
-    <div className="flex flex-col gap-72 self-center">
+    <div className="controls">
       <h2 className="timer">{convertTime(blackTime)}</h2>
       <div className="relative z-[500]">
         <button className="button" onClick={handleRestart}>

@@ -1,93 +1,91 @@
-import React, { FC, useEffect, useState } from 'react';
-import { Board } from 'models/Board';
+import { useEffect, useState } from 'react';
 import { Cell } from 'models/Cell';
-import { Player } from 'models/Player';
-import { FENChar, figureCosts } from 'types/enums';
+import { Colors, FENChar } from 'types/enums';
 import { PromotionFigureDialog } from 'components/PromotionFigureDialog';
 import { Pawn } from 'models/figures/Pawn';
 import LostFigures from 'modules/LostFigures';
 import CellsModule from 'modules/CellsModule';
 import DummyCellsModule from 'modules/DummyCellsModule';
+import { useGameStateStore } from 'store/gameSettingsStore';
+import { useMoveListStore } from 'store/moveListStore';
+import { Player } from 'models/Player';
+import evaluate from 'helpers/materialEvaluation';
 
-interface BoardProps {
-  board: Board;
-  setBoard: (board: Board) => void;
-  currentPlayer: Player | null;
-  selectedMoveIndex: number;
-  swapPlayer: () => void;
-  setGameOverMessage: (gameOverMessage: string | null) => void;
-}
-
-const BoardModule: FC<BoardProps> = ({
-  board,
-  setBoard,
-  currentPlayer,
-  selectedMoveIndex,
-  swapPlayer,
-  setGameOverMessage,
-}) => {
+const BoardModule = () => {
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
   const [isPromotionDialogActive, setIsPromotionDialogActive] = useState(false);
   const [promotedFigure, setPromotedFigure] = useState<FENChar>();
   const [targetCell, setTargetCell] = useState<Cell | null>(null); // only for promotion move
+  const {
+    isGameStarted,
+    currentPlayer,
+    setIsGameStarted,
+    setBoard,
+    setCurrentPlayer,
+    setGameOverMessage,
+  } = useGameStateStore();
+  const board = useGameStateStore((state) => state.board!); // board cannot be null because of CheckChessBoardAvailability hoc
+  const { setMoveList, selectedMoveIndex, setSelectedMoveIndex } = useMoveListStore();
 
   useEffect(() => {
     highlightCells();
   }, [selectedCell]);
 
   useEffect(() => {
-    if (promotedFigure && targetCell) moveFigure(targetCell);
+    if (promotedFigure && targetCell) clickOnFigure(targetCell);
   }, [promotedFigure]);
 
-  const moveFigure = (cell: Cell) => {
-    if (currentPlayer && selectedCell && selectedCell !== cell && cell.available) {
-      if (
-        selectedCell.figure instanceof Pawn &&
-        selectedCell.figure.isPromotionMove(cell.y) &&
-        !isPromotionDialogActive
-      ) {
-        setTargetCell(cell);
-        setIsPromotionDialogActive(true);
-      } else {
-        const newBoard = board.moveFigure(selectedCell, cell, promotedFigure);
+  const swapPlayer = () => {
+    setCurrentPlayer(
+      currentPlayer?.color === Colors.WHITE ? new Player(Colors.BLACK) : new Player(Colors.WHITE),
+    );
+    setSelectedMoveIndex(board.gameHistory.length - 1);
+    if (!isGameStarted) setIsGameStarted(true);
+  };
 
-        setGameOverMessage(newBoard.gameOverMessage);
-        setBoard(newBoard);
-        setSelectedCell(null);
-        setIsPromotionDialogActive(false);
-        setPromotedFigure(undefined);
-        setTargetCell(null);
-        swapPlayer();
-      }
+  const clickOnFigure = (cell: Cell) => {
+    if (currentPlayer && selectedCell && selectedCell !== cell && cell.available) {
+      moveAction(selectedCell, cell);
     } else if (cell.figure?.color === currentPlayer?.color) {
       setSelectedCell(cell);
       board.resetCellAvailabilityFlags();
     }
   };
 
-  const highlightCells = () => {
-    if (currentPlayer && selectedCell) {
-      board.highlightCells(selectedCell);
-      const newBoard = board.getCopyBoard(currentPlayer.color);
-      setBoard(newBoard);
+  const moveAction = (selectedCell: Cell, cell: Cell) => {
+    // if move is promotion open promotion move dialog
+    if (
+      selectedCell.figure instanceof Pawn &&
+      selectedCell.figure.isPromotionMove(cell.y) &&
+      !isPromotionDialogActive
+    ) {
+      setTargetCell(cell);
+      setIsPromotionDialogActive(true);
+    } else {
+      moveFigure(selectedCell, cell, promotedFigure);
     }
   };
 
-  /**
-   * Returns sum of figures weights.
-   * White figures have positive weights, and black figures have negative weights.
-   * If the sum is positive, then the material advantage is in the direction of White,
-   * and if it is negative - in the direction of Black.
-   */
-  const evaluate = (): number => {
-    const totalCost = board.gameHistory[selectedMoveIndex].board.reduce(
-      (cost, row) => cost + row.reduce((acc, curr) => (curr ? acc + figureCosts[curr] : acc), 0),
-      0,
-    );
-    return totalCost;
+  const moveFigure = (currentCell: Cell, targetCell: Cell, promotedFigure?: FENChar) => {
+    const newBoard = board.moveFigure(currentCell, targetCell, promotedFigure);
+    setGameOverMessage(newBoard.gameOverMessage);
+    setBoard(newBoard);
+    setMoveList(newBoard.moveList);
+    setSelectedCell(null);
+    setIsPromotionDialogActive(false);
+    setPromotedFigure(undefined);
+    setTargetCell(null);
+    swapPlayer();
   };
 
-  const evaluationSum = evaluate();
+  const highlightCells = () => {
+    if (currentPlayer && selectedCell) {
+      board.highlightCells(selectedCell);
+      setBoard(board);
+    }
+  };
+
+  const evaluationSum = evaluate(board.gameHistory[selectedMoveIndex].board);
 
   return (
     <div className="board">
@@ -104,7 +102,7 @@ const BoardModule: FC<BoardProps> = ({
       {selectedMoveIndex < board.gameHistory.length - 1 ? (
         <DummyCellsModule boardState={board.gameHistory[selectedMoveIndex].board} />
       ) : (
-        <CellsModule board={board} selectedCell={selectedCell} moveFigure={moveFigure} />
+        <CellsModule board={board} selectedCell={selectedCell} moveFigure={clickOnFigure} />
       )}
       <ul className="symbols columns-letters">
         {board.COLUMNS_LETTERS.map((symbol) => (
