@@ -78,6 +78,12 @@ export class Board {
     return this.cells[y][x];
   }
 
+  public getCellByMoveNotation(move: string): Cell {
+    const x = this.COLUMNS_LETTERS.indexOf(move[0]);
+    const y = this.ROWS_NUMBERS.indexOf(move[1]);
+    return this.getCell(x, y);
+  }
+
   public resetCellAvailabilityFlags(): void {
     for (let y = 0; y < this.cells.length; y++) {
       const row = this.cells[y];

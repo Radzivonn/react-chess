@@ -8,8 +8,8 @@ import CellsModule from 'modules/CellsModule';
 import DummyCellsModule from 'modules/DummyCellsModule';
 import { useGameStateStore } from 'store/gameSettingsStore';
 import { useMoveListStore } from 'store/moveListStore';
-import { Player } from 'models/Player';
 import evaluate from 'helpers/materialEvaluation';
+import useStockfish from 'hooks/useStockfish';
 
 const BoardModule = () => {
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
@@ -27,6 +27,15 @@ const BoardModule = () => {
   const board = useGameStateStore((state) => state.board!); // board cannot be null because of CheckChessBoardAvailability hoc
   const { setMoveList, selectedMoveIndex, setSelectedMoveIndex } = useMoveListStore();
 
+  const engineMoveFigure = (move: string) => {
+    const currentCell = board.getCellByMoveNotation(move.slice(0, 2));
+    const targetCell = board.getCellByMoveNotation(move.slice(2));
+    const promotedFigure = move.slice(4) as FENChar; // !
+    moveFigure(currentCell, targetCell, promotedFigure);
+  };
+
+  useStockfish(board.boardFENFormat, engineMoveFigure);
+
   useEffect(() => {
     highlightCells();
   }, [selectedCell]);
@@ -35,18 +44,11 @@ const BoardModule = () => {
     if (promotedFigure && targetCell) clickOnFigure(targetCell);
   }, [promotedFigure]);
 
-  const swapPlayer = () => {
-    setCurrentPlayer(
-      currentPlayer?.color === Colors.WHITE ? new Player(Colors.BLACK) : new Player(Colors.WHITE),
-    );
-    setSelectedMoveIndex(board.gameHistory.length - 1);
-    if (!isGameStarted) setIsGameStarted(true);
-  };
-
   const clickOnFigure = (cell: Cell) => {
-    if (currentPlayer && selectedCell && selectedCell !== cell && cell.available) {
+    // !!! checking currentPlayer === Colors.WHITE TEMPORARY to test engine
+    if (currentPlayer === Colors.WHITE && selectedCell && selectedCell !== cell && cell.available) {
       moveAction(selectedCell, cell);
-    } else if (cell.figure?.color === currentPlayer?.color) {
+    } else if (currentPlayer === Colors.WHITE && cell.figure?.color === currentPlayer) {
       setSelectedCell(cell);
       board.resetCellAvailabilityFlags();
     }
@@ -75,11 +77,13 @@ const BoardModule = () => {
     setIsPromotionDialogActive(false);
     setPromotedFigure(undefined);
     setTargetCell(null);
-    swapPlayer();
+    setSelectedMoveIndex(board.gameHistory.length - 1);
+    setCurrentPlayer(newBoard.currentPlayerColor);
+    if (!isGameStarted) setIsGameStarted(true);
   };
 
   const highlightCells = () => {
-    if (currentPlayer && selectedCell) {
+    if (selectedCell) {
       board.highlightCells(selectedCell);
       setBoard(board);
     }
@@ -114,9 +118,9 @@ const BoardModule = () => {
         figures={board.gameHistory[selectedMoveIndex].capturedBlackFigures}
         className="area-bottom"
       />
-      {isPromotionDialogActive && !promotedFigure && currentPlayer && (
+      {isPromotionDialogActive && !promotedFigure && (
         <PromotionFigureDialog
-          color={currentPlayer?.color}
+          color={currentPlayer}
           setIsPromotionDialogActive={setIsPromotionDialogActive}
           selectPromotedFigure={setPromotedFigure}
         />
