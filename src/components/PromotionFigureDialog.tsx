@@ -1,13 +1,5 @@
 import { FC, MouseEvent } from 'react';
-import { Colors, FENChar } from 'types/enums';
-import whiteQueenLogo from 'assets/white-queen.svg';
-import whiteRookLogo from 'assets/white-rook.svg';
-import whiteBishopLogo from 'assets/white-bishop.svg';
-import whiteKnightLogo from 'assets/white-knight.svg';
-import blackQueenLogo from 'assets/black-queen.svg';
-import blackRookLogo from 'assets/black-rook.svg';
-import blackBishopLogo from 'assets/black-bishop.svg';
-import blackKnightLogo from 'assets/black-knight.svg';
+import { Colors, FENChar, figureImagePaths } from 'types/enums';
 
 interface Props {
   color: Colors;
@@ -32,25 +24,31 @@ export const PromotionFigureDialog: FC<Props> = ({
         <img
           id={isBlack ? FENChar.BlackQueen : FENChar.WhiteQueen}
           onClick={(e) => selectFigure(e)}
-          src={isBlack ? blackQueenLogo : whiteQueenLogo}
+          src={
+            isBlack ? figureImagePaths[FENChar.BlackQueen] : figureImagePaths[FENChar.WhiteQueen]
+          }
           alt="figure"
         />
         <img
           id={isBlack ? FENChar.BlackRook : FENChar.WhiteRook}
           onClick={(e) => selectFigure(e)}
-          src={isBlack ? blackRookLogo : whiteRookLogo}
+          src={isBlack ? figureImagePaths[FENChar.BlackRook] : figureImagePaths[FENChar.WhiteRook]}
           alt="figure"
         />
         <img
           id={isBlack ? FENChar.BlackBishop : FENChar.WhiteBishop}
           onClick={(e) => selectFigure(e)}
-          src={isBlack ? blackBishopLogo : whiteBishopLogo}
+          src={
+            isBlack ? figureImagePaths[FENChar.BlackBishop] : figureImagePaths[FENChar.WhiteBishop]
+          }
           alt="figure"
         />
         <img
           id={isBlack ? FENChar.BlackKnight : FENChar.WhiteKnight}
           onClick={(e) => selectFigure(e)}
-          src={isBlack ? blackKnightLogo : whiteKnightLogo}
+          src={
+            isBlack ? figureImagePaths[FENChar.BlackKnight] : figureImagePaths[FENChar.WhiteKnight]
+          }
           alt="figure"
         />
         <div id="cross" onClick={() => setIsPromotionDialogActive(false)}></div>
