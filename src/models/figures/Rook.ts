@@ -6,9 +6,10 @@ import { Cell } from '../Cell';
 export class Rook extends Figure {
   public hasMoved = false;
 
-  constructor(x: number, y: number, color: Colors, id?: number) {
+  constructor(x: number, y: number, color: Colors, hasMoved: boolean, id?: number) {
     super(x, y, color, id);
     this.FENChar = color === Colors.WHITE ? FENChar.WhiteRook : FENChar.BlackRook;
+    this.hasMoved = hasMoved;
   }
 
   canMove(board: Board, target: Cell): boolean {
@@ -25,6 +26,6 @@ export class Rook extends Figure {
   }
 
   clone() {
-    return new Rook(this.x, this.y, this.color, this.id);
+    return new Rook(this.x, this.y, this.color, this.hasMoved, this.id);
   }
 }

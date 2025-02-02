@@ -275,8 +275,10 @@ export class Board {
       const row = this.cells[y];
 
       for (let x = 0; x < row.length; x++) {
+        if (!selectedCell.figure) continue;
+
         const target = row[x];
-        const isFigureCanMove = !!selectedCell?.figure?.canMove(this, target);
+        const isFigureCanMove = !!selectedCell.figure.canMove(this, target);
 
         if (isFigureCanMove && this.isPositionSafeAfterMove(selectedCell, target)) {
           target.available = true;
@@ -337,7 +339,7 @@ export class Board {
       return new Bishop(x, y, this.currentPlayerColor, id);
 
     if (promotedFigure === FENChar.WhiteRook || promotedFigure === FENChar.BlackRook)
-      return new Rook(x, y, this.currentPlayerColor, id);
+      return new Rook(x, y, this.currentPlayerColor, true, id);
 
     return new Queen(x, y, this.currentPlayerColor, id);
   }
@@ -384,10 +386,10 @@ export class Board {
 
     if (currentFigure.color === Colors.BLACK) {
       const figureIndex = this.blackFigures.findIndex((f) => f.id === currentFigure?.id);
-      if (figureIndex) this.blackFigures[figureIndex] = target.figure.clone();
+      if (figureIndex > -1) this.blackFigures[figureIndex] = target.figure.clone();
     } else {
       const figureIndex = this.whiteFigures.findIndex((f) => f.id === currentFigure?.id);
-      if (figureIndex) this.whiteFigures[figureIndex] = target.figure.clone();
+      if (figureIndex > -1) this.whiteFigures[figureIndex] = target.figure.clone();
     }
 
     // En Passant capture
@@ -657,10 +659,10 @@ export class Board {
   }
 
   private addRooks() {
-    const blackRook = new Rook(0, 0, Colors.BLACK);
-    const blackRook2 = new Rook(7, 0, Colors.BLACK);
-    const whiteRook = new Rook(0, 7, Colors.WHITE);
-    const whiteRook2 = new Rook(7, 7, Colors.WHITE);
+    const blackRook = new Rook(0, 0, Colors.BLACK, false);
+    const blackRook2 = new Rook(7, 0, Colors.BLACK, false);
+    const whiteRook = new Rook(0, 7, Colors.WHITE, false);
+    const whiteRook2 = new Rook(7, 7, Colors.WHITE, false);
 
     this.cells[0][0].figure = blackRook;
     this.cells[0][7].figure = blackRook2;
