@@ -2,11 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Colors } from 'types/enums';
 import { useGameStateStore } from 'store/gameSettingsStore';
 import { Board } from 'models/Board';
-import { Player } from 'models/Player';
 import { useMoveListStore } from 'store/moveListStore';
 import convertTime from 'helpers/convertTime';
 
-const GAME_TIME = 300; // (5 minutes) in seconds
+const GAME_TIME = 600; // TODO сделать выбор времени на партию (10 minutes) in seconds
 
 const Timer = () => {
   const [blackTime, setBlackTime] = useState(GAME_TIME);
@@ -17,6 +16,7 @@ const Timer = () => {
     currentPlayer,
     gameOverMessage,
     setIsGameStarted,
+    setEvaluation,
     setBoard,
     setCurrentPlayer,
     setGameOverMessage,
@@ -45,8 +45,9 @@ const Timer = () => {
     const newBoard = new Board();
     newBoard.restartGame();
     setIsGameStarted(false);
+    setEvaluation('50%');
     setBoard(newBoard);
-    setCurrentPlayer(new Player(Colors.WHITE));
+    setCurrentPlayer(Colors.WHITE);
     setGameOverMessage(null);
     setSelectedMoveIndex(0);
     setIsGameStarted(false);
@@ -56,8 +57,7 @@ const Timer = () => {
   const startTimer = () => {
     if (timer.current) clearInterval(timer.current);
     if (!isStopped) {
-      const callback =
-        currentPlayer?.color === Colors.WHITE ? decrementWhiteTimer : decrementBlackTimer;
+      const callback = currentPlayer === Colors.WHITE ? decrementWhiteTimer : decrementBlackTimer;
       timer.current = setInterval(callback, 1000);
     }
   };
