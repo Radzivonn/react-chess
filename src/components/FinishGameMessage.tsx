@@ -1,10 +1,13 @@
-import { useGameStateStore } from 'store/gameSettingsStore';
+import { FC } from 'react';
 
-export const FinishGameMessage = () => {
-  const gameOverMessage = useGameStateStore((state) => state.gameOverMessage);
+interface Props {
+  message: string;
+}
+
+export const FinishGameMessage: FC<Props> = ({ message }) => {
   return (
     <div className="message-bg">
-      <div className="message"> {gameOverMessage} </div>
+      <div className="message"> {message} </div>
     </div>
   );
 };

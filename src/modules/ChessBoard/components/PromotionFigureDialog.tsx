@@ -1,5 +1,6 @@
 import { FC, MouseEvent } from 'react';
 import { Colors, FENChar, figureImagePaths } from 'types/enums';
+import isEnumValue from 'helpers/CheckIsEnumValue';
 
 interface Props {
   color: Colors;
@@ -15,7 +16,8 @@ export const PromotionFigureDialog: FC<Props> = ({
   const isBlack = color === Colors.BLACK;
 
   const selectFigure = (event: MouseEvent) => {
-    selectPromotedFigure(event.currentTarget.id as FENChar);
+    const figureChar = event.currentTarget.id;
+    if (isEnumValue(FENChar, figureChar)) selectPromotedFigure(figureChar);
   };
 
   return (

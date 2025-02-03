@@ -1,11 +1,11 @@
-import { type FC } from 'react';
-import { ChildrenProps } from 'types/types';
 import { useGameStateStore } from 'store/gameSettingsStore';
+import { FinishGameMessage } from 'components/FinishGameMessage';
 
-export const CheckIsGameFinished: FC<ChildrenProps> = ({ children }) => {
+export const CheckIsGameFinished = () => {
   const gameOverMessage = useGameStateStore((state) => state.gameOverMessage);
+
   if (gameOverMessage) {
-    return children;
+    return <FinishGameMessage message={gameOverMessage} />;
   }
 
   return <></>;

@@ -3,7 +3,7 @@ export enum Colors {
   BLACK = 'black',
 }
 
-export const enum FENChar {
+export enum FENChar {
   WhitePawn = 'P',
   WhiteKnight = 'N',
   WhiteBishop = 'B',

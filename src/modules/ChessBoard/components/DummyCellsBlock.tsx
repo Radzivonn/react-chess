@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import DummyCellComponent from 'components/DummyCell';
+import DummyCellComponent from './DummyCell';
 import { boardFENCharState } from 'types/types';
 import { Colors } from 'types/enums';
 
@@ -8,7 +8,7 @@ interface DummyCellsModuleProps {
 }
 
 // This is a component to display the state of the board on previous moves
-const DummyCellsModule: FC<DummyCellsModuleProps> = ({ boardState }) => {
+const DummyCellsBlock: FC<DummyCellsModuleProps> = ({ boardState }) => {
   return (
     <div className="cells-block">
       {boardState.map((row, y) => (
@@ -26,4 +26,4 @@ const DummyCellsModule: FC<DummyCellsModuleProps> = ({ boardState }) => {
   );
 };
 
-export default DummyCellsModule;
+export default DummyCellsBlock;

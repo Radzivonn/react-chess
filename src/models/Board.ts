@@ -550,11 +550,15 @@ export class Board {
     return this.COLUMNS_LETTERS[prevX] + this.ROWS_NUMBERS[prevY];
   }
 
+  private getFiguresFENCharArray(figures: Figure[]): FENChar[] {
+    return figures.reduce((res: FENChar[], f) => (f.FENChar ? [...res, f.FENChar] : res), []);
+  }
+
   private updateGameHistory(): void {
     this.gameHistory.push({
       board: [...this.chessBoardView.map((row) => [...row])],
-      capturedBlackFigures: [...this.lostBlackFigures.map((f) => f.FENChar as FENChar)],
-      capturedWhiteFigures: [...this.lostWhiteFigures.map((f) => f.FENChar as FENChar)],
+      capturedBlackFigures: this.getFiguresFENCharArray(this.lostBlackFigures),
+      capturedWhiteFigures: this.getFiguresFENCharArray(this.lostWhiteFigures),
       checkState: this.checkState,
       lastMove: this.lastMove ? { ...this.lastMove } : null,
     });
@@ -681,10 +685,10 @@ export class Board {
 
   private addFigures() {
     this.addKings();
+    this.addRooks();
     this.addQueens();
     this.addBishops();
     this.addKnights();
-    this.addRooks();
     this.addPawns();
   }
 }

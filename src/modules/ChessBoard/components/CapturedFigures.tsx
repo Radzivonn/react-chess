@@ -7,9 +7,9 @@ interface Props {
   className?: string;
 }
 
-const LostFigures: FC<Props> = ({ evaluation, figures, className }) => {
+const CapturedFigures: FC<Props> = ({ evaluation, figures, className }) => {
   return (
-    <div className={`lost-figures ${className}`}>
+    <div className={`captured-figures ${className}`}>
       {evaluation && <h3> +{Math.abs(evaluation)} </h3>}
       {figures
         .toSorted((a, b) => Math.abs(figureCosts[b]) - Math.abs(figureCosts[a]))
@@ -22,4 +22,4 @@ const LostFigures: FC<Props> = ({ evaluation, figures, className }) => {
   );
 };
 
-export default LostFigures;
+export default CapturedFigures;

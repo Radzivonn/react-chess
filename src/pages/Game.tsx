@@ -1,8 +1,6 @@
-import BoardModule from 'modules/Board';
 import Timer from 'modules/Timer';
-import { FinishGameMessage } from 'components/FinishGameMessage';
 import MoveHistoryTable from 'modules/MoveHistoryTable';
-import { CheckChessBoardAvailability } from 'hocs/CheckChessBoardAvailability';
+import { ChessBoard } from 'hocs/ChessBoard';
 import { CheckIsGameFinished } from 'hocs/CheckIsGameFinished';
 import EvaluationBar from 'modules/EvaluationBar';
 
@@ -11,13 +9,9 @@ const Game = () => {
     <div className="game">
       <Timer />
       <EvaluationBar />
-      <CheckChessBoardAvailability>
-        <BoardModule />
-      </CheckChessBoardAvailability>
+      <ChessBoard />
       <MoveHistoryTable />
-      <CheckIsGameFinished>
-        <FinishGameMessage />
-      </CheckIsGameFinished>
+      <CheckIsGameFinished />
     </div>
   );
 };

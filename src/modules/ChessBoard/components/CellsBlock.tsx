@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { Board } from 'models/Board';
 import { Cell } from 'models/Cell';
-import CellComponent from 'components/Cell';
+import CellComponent from './Cell';
 
 interface CellsModuleProps {
   board: Board;
@@ -10,7 +10,7 @@ interface CellsModuleProps {
 }
 
 // This is a component to display the current state of the board and with interactivity
-const CellsModule: FC<CellsModuleProps> = ({ board, selectedCell, moveFigure }) => {
+const CellsBlock: FC<CellsModuleProps> = ({ board, selectedCell, moveFigure }) => {
   return (
     <div className="cells-block">
       {board.cells.map((row, index) => (
@@ -29,4 +29,4 @@ const CellsModule: FC<CellsModuleProps> = ({ board, selectedCell, moveFigure }) 
   );
 };
 
-export default CellsModule;
+export default CellsBlock;
