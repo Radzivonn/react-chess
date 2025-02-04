@@ -4,29 +4,32 @@ import { Board } from 'models/Board';
 import { Colors } from 'types/enums';
 
 interface GameStateStore {
+  timeControls: number | null; // Time Controls of game in seconds, null - game without time controls
   isGameStarted: boolean;
-  setIsGameStarted: (isGameStarted: boolean) => void;
   evaluation: string;
-  setEvaluation: (evaluation: string) => void;
   board: Board | null;
-  setBoard: (board: Board | null) => void;
   currentPlayer: Colors;
-  setCurrentPlayer: (player: Colors) => void;
   gameOverMessage: string | null;
+  setTimeControls: (timeControls: number | null) => void;
+  setIsGameStarted: (isGameStarted: boolean) => void;
+  setEvaluation: (evaluation: string) => void;
+  setBoard: (board: Board | null) => void;
+  setCurrentPlayer: (player: Colors) => void;
   setGameOverMessage: (message: string | null) => void;
 }
 
 export const useGameStateStore = create<GameStateStore>()(
   devtools((set) => ({
     isGameStarted: false,
-    setIsGameStarted: (isGameStarted) => set(() => ({ isGameStarted })),
     evaluation: '50%',
-    setEvaluation: (evaluation) => set(() => ({ evaluation })),
     board: null,
-    setBoard: (board) => set(() => ({ board })),
     currentPlayer: Colors.WHITE,
-    setCurrentPlayer: (player) => set(() => ({ currentPlayer: player })),
     gameOverMessage: null,
+    setTimeControls: (timeControls) => set(() => ({ timeControls })),
+    setIsGameStarted: (isGameStarted) => set(() => ({ isGameStarted })),
+    setEvaluation: (evaluation) => set(() => ({ evaluation })),
+    setBoard: (board) => set(() => ({ board })),
+    setCurrentPlayer: (player) => set(() => ({ currentPlayer: player })),
     setGameOverMessage: (message) => set(() => ({ gameOverMessage: message })),
   })),
 );
