@@ -1,14 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { Colors } from 'types/enums';
-import { useGameStateStore } from 'store/gameSettingsStore';
+import { useGameStateStore } from 'store/useGameState';
 import convertTime from 'helpers/convertTime';
-import { RestartButton } from 'components/RestartButton';
 
-const GAME_TIME = 600; // TODO сделать выбор времени на партию (10 minutes) in seconds
+interface Props {
+  timeControls: number;
+}
 
-const Timer = () => {
-  const [blackTime, setBlackTime] = useState(GAME_TIME);
-  const [whiteTime, setWhiteTime] = useState(GAME_TIME);
+const Timer: FC<Props> = ({ timeControls }) => {
+  const [blackTime, setBlackTime] = useState(timeControls);
+  const [whiteTime, setWhiteTime] = useState(timeControls);
   const timer = useRef<null | ReturnType<typeof setInterval>>(null);
   const { isGameStarted, currentPlayer, gameOverMessage, setGameOverMessage } = useGameStateStore();
   const isStopped = !!gameOverMessage || !isGameStarted;
@@ -18,6 +19,7 @@ const Timer = () => {
   }, [isStopped]);
 
   useEffect(() => {
+    if (isStopped) resetTimer();
     startTimer();
   }, [currentPlayer, isStopped]);
 
@@ -47,16 +49,13 @@ const Timer = () => {
   };
 
   const resetTimer = () => {
-    setWhiteTime(GAME_TIME);
-    setBlackTime(GAME_TIME);
+    setWhiteTime(timeControls);
+    setBlackTime(timeControls);
   };
 
   return (
-    <div className="controls">
+    <div className="timer-block">
       <h2 className="timer">{convertTime(blackTime)}</h2>
-      <div className="relative z-[500]">
-        <RestartButton resetTimer={resetTimer} />
-      </div>
       <h2 className="timer">{convertTime(whiteTime)}</h2>
     </div>
   );

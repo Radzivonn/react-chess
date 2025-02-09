@@ -1,14 +1,12 @@
-import { FC, useEffect } from 'react';
-import { useGameStateStore } from 'store/gameSettingsStore';
-import { useMoveListStore } from 'store/moveListStore';
+import { useEffect } from 'react';
+import { useGameSettingsStore } from 'store/useGameSettings';
+import { useGameStateStore } from 'store/useGameState';
+import { useMoveListStore } from 'store/useMoveList';
 import { Board } from 'models/Board';
 import { Colors } from 'types/enums';
 
-interface Props {
-  resetTimer: () => void;
-}
-
-export const RestartButton: FC<Props> = ({ resetTimer }) => {
+export const RestartButton = () => {
+  const { settingsModified, setSettingsModified } = useGameSettingsStore();
   const { setIsGameStarted, setEvaluation, setBoard, setCurrentPlayer, setGameOverMessage } =
     useGameStateStore();
   const { setMoveList, setSelectedMoveIndex } = useMoveListStore();
@@ -16,6 +14,13 @@ export const RestartButton: FC<Props> = ({ resetTimer }) => {
   useEffect(() => {
     restart();
   }, []);
+
+  useEffect(() => {
+    if (settingsModified) {
+      restart();
+      setSettingsModified(false);
+    }
+  }, [settingsModified]);
 
   const restart = () => {
     const newBoard = new Board();
@@ -29,14 +34,9 @@ export const RestartButton: FC<Props> = ({ resetTimer }) => {
     setMoveList([]);
   };
 
-  const handleRestart = () => {
-    resetTimer();
-    restart();
-  };
-
   return (
-    <button className="button" onClick={() => handleRestart()}>
-      Restart
+    <button className="button--icon relative z-[500]" onClick={() => restart()}>
+      <img width="54" height="54" color="red" src="/public/reload.svg" alt="restart" />
     </button>
   );
 };

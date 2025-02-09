@@ -2,13 +2,14 @@ import React, { FC, useState } from 'react';
 import './style.scss';
 
 interface Props {
+  name: string;
   min: number;
   max: number;
   defaultValue: number;
   setOption: (value: number) => void;
 }
 
-const Range: FC<Props> = ({ min, max, defaultValue, setOption }) => {
+const Range: FC<Props> = ({ name, min, max, defaultValue, setOption }) => {
   const [currentValue, setCurrentValue] = useState(defaultValue);
 
   const onChange = (value: string) => {
@@ -21,6 +22,7 @@ const Range: FC<Props> = ({ min, max, defaultValue, setOption }) => {
 
   return (
     <div className="range-container">
+      <label className="range__name"> {name} </label>
       <input
         type="range"
         min={min}
@@ -29,7 +31,7 @@ const Range: FC<Props> = ({ min, max, defaultValue, setOption }) => {
         onChange={(e) => onChange(e.target.value)}
         className="custom-range"
       />
-      <span className="range-value">{currentValue}</span>
+      <span className="range__value">{currentValue}</span>
     </div>
   );
 };

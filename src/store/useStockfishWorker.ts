@@ -56,7 +56,7 @@ export const useStockfishWorkerStore = create<StockfishWorkerStore>()(
         sendCommandToStockfish(`setoption name Hash value ${hash}`);
         sendCommandToStockfish(`setoption name Move Overhead value ${maxMoveTime}`);
         sendCommandToStockfish(`setoption name Skill Level value ${skillLevel}`);
-        sendCommandToStockfish(`setoption name UCI_Elo type value ${UCIElo}`);
+        sendCommandToStockfish(`setoption name UCI_Elo value ${UCIElo}`);
       }
     },
     getBestStockfishMove: (fen, depth) => {

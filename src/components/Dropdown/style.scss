@@ -1,6 +1,6 @@
 .dropdown {
   position: relative;
-  width: 200px;
+  width: 250px;
   background-color: var(--cell-light-color);
   font-size: large;
   font-weight: 500;
@@ -8,12 +8,13 @@
 }
 
 .dropdown-header {
-  padding: 10px;
-  border-radius: 4px;
-  cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 10px 8px;
+  border: 2px solid var(--cell-dark-color);
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .arrow {
