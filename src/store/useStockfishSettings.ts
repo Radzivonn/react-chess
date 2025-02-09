@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 
 export const settingsValueRanges = {
-  engineSkillLevel: { min: 0, max: 20, default: 10 },
-  moveOverheadValue: { min: 1, max: 5000, default: 100 },
-  UCIEloValue: { min: 1320, max: 3190, default: 1320 },
-  depth: { min: 1, max: 30, default: 15 },
-  hash: { min: 4, max: 128, default: 64 },
+  engineSkillLevel: { optionName: 'skill level', min: 0, max: 20, default: 10 },
+  moveOverheadValue: { optionName: 'move time', min: 10, max: 5000, default: 100 },
+  UCIEloValue: { optionName: 'UCI Elo', min: 1320, max: 3190, default: 1320 },
+  depth: { optionName: 'depth', min: 1, max: 30, default: 15 },
+  hash: { optionName: 'hash(MB)', min: 4, max: 128, default: 64 },
 } as const;
 
 type SettingKey = keyof typeof settingsValueRanges;
@@ -16,11 +16,14 @@ interface StateItem<T> {
   setter: (value: T) => void;
 }
 
+export type Items = StateItem<number>[];
+
 interface StockfishSettingsStore {
   stockfishSettingsModified: boolean;
   setStockfishSettingsModified: (modified: boolean) => void;
-  items: StateItem<number>[];
+  items: Items;
   getItem: (key: string) => StateItem<number>;
+  setItems: (items: Items) => void;
 }
 
 const useStockfishSettingsStore = create<StockfishSettingsStore>((set, get) => ({
@@ -43,6 +46,7 @@ const useStockfishSettingsStore = create<StockfishSettingsStore>((set, get) => (
     if (item) return item;
     throw new Error(`Item by ${key} key was not found`);
   },
+  setItems: (items) => set(() => ({ items })),
 }));
 
 export default useStockfishSettingsStore;

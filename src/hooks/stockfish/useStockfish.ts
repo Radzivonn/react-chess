@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { Colors, FENChar } from 'types/enums';
-import { useGameStateStore } from 'store/gameSettingsStore';
+import { useGameStateStore } from 'store/useGameState';
 import {
   getBestMove,
   getCurrentDepth,
@@ -9,24 +9,30 @@ import {
 import isEnumValue from 'helpers/CheckIsEnumValue';
 import { Board } from 'models/Board';
 import { Cell } from 'models/Cell';
+import useStockfishSettingsStore from 'store/useStockfishSettings';
+import useStockfishWorkerStore from 'store/useStockfishWorker';
 
 type UseStockfishHook = (
   board: Board,
   moveFigure: (currentCell: Cell, targetCell: Cell, promotedFigure?: FENChar) => void,
-  skillLevel?: number,
-  depth?: number,
 ) => void;
 
-const useStockfish: UseStockfishHook = (
-  board,
-  moveFigure,
-  hash = 128,
-  maxMoveTime = 500,
-  skillLevel = 10,
-  UCIElo = 1500,
-  depth = 15,
-) => {
-  const stockfishRef = useRef<Worker | null>(null);
+const useStockfish: UseStockfishHook = (board, moveFigure) => {
+  const {
+    stockfishWorker,
+    setStockfishWorker,
+    sendCommandToStockfish,
+    startStockfish,
+    restartStockfish,
+    stopStockfish,
+    setupStockfish,
+    getBestStockfishMove,
+  } = useStockfishWorkerStore();
+  const settingsModified = useStockfishSettingsStore((state) => state.stockfishSettingsModified);
+  const setSettingsModified = useStockfishSettingsStore(
+    (state) => state.setStockfishSettingsModified,
+  );
+  const getItem = useStockfishSettingsStore((state) => state.getItem);
   const { isGameStarted, currentPlayer, setEvaluation } = useGameStateStore();
 
   const engineMoveFigure = (move: string) => {
@@ -39,75 +45,66 @@ const useStockfish: UseStockfishHook = (
     moveFigure(currentCell, targetCell, promotedFigure);
   };
 
-  const sendToStockfish = (command: string) => {
-    if (stockfishRef.current) {
-      stockfishRef.current.postMessage(command);
-    }
+  const setupEngine = () => {
+    setupStockfish(
+      getItem('hash').value,
+      getItem('moveOverheadValue').value,
+      getItem('engineSkillLevel').value,
+      getItem('UCIEloValue').value,
+    );
   };
 
   useEffect(() => {
-    stockfishRef.current = new Worker(new URL('/stockfish-16.1.js', import.meta.url), {
-      type: 'module',
-    });
-
-    sendToStockfish('uci');
-    sendToStockfish('isready');
-    sendToStockfish('setoption name Threads value 4');
-    sendToStockfish(`setoption name Hash value ${hash}`);
-    sendToStockfish(`setoption name Move Overhead value ${maxMoveTime}`);
-    sendToStockfish(`setoption name Skill Level value ${skillLevel}`);
-    sendToStockfish(`setoption name UCI_Elo type value ${UCIElo}`);
-
-    console.log('RERENDER');
+    setStockfishWorker(
+      new Worker(new URL('/stockfish-16.1.js', import.meta.url), {
+        type: 'module',
+      }),
+    );
+    startStockfish();
+    setupEngine();
 
     return () => {
-      if (stockfishRef.current) {
-        sendToStockfish('stop');
-        sendToStockfish('setoption name Clear Hash');
-        stockfishRef.current.terminate();
-      }
+      stopStockfish();
     };
   }, []);
 
   useEffect(() => {
-    if (stockfishRef.current) {
-      stockfishRef.current.onmessage = (event) => {
+    if (settingsModified) {
+      setupEngine();
+      setSettingsModified(false);
+    }
+  }, [settingsModified]);
+
+  useEffect(() => {
+    if (stockfishWorker) {
+      stockfishWorker.onmessage = (event) => {
         const message = event.data;
         // console.log('Stockfish:', message);
-        if (message.startsWith('info') && getCurrentDepth(message) === depth) {
+        if (message.startsWith('info') && getCurrentDepth(message) === getItem('depth').value) {
           setEvaluation(getEvaluationPercentage(message, currentPlayer));
         } else if (message.startsWith('bestmove')) {
           const bestMove = getBestMove(message);
-          console.log('Best move:', bestMove); // ! remove
+          console.log('Best move:', bestMove);
           if (bestMove) engineMoveFigure(bestMove);
         }
       };
     }
-    console.log('rerender useEffect');
   }, [moveFigure]);
 
   useEffect(() => {
     if (!isGameStarted) {
-      sendToStockfish('stop');
-      sendToStockfish('setoption name Clear Hash');
-      sendToStockfish('ucinewgame');
-      sendToStockfish(`position fen ${board.boardFENFormat}`);
-      sendToStockfish('isready');
+      restartStockfish(board.boardFENFormat);
     }
   }, [isGameStarted]);
 
   // getting best move after every move
   useEffect(() => {
-    // !
     if (currentPlayer === Colors.WHITE) {
-      sendToStockfish('stop');
-    } else if (stockfishRef.current) {
-      sendToStockfish(`position fen ${board.boardFENFormat}`);
-      sendToStockfish('isready');
-      sendToStockfish(`go depth ${depth}`);
+      sendCommandToStockfish('stop');
+    } else if (stockfishWorker) {
+      getBestStockfishMove(board.boardFENFormat, getItem('depth').value);
     }
-    console.log('rerender move effect');
-  }, [stockfishRef.current, board.boardFENFormat]);
+  }, [stockfishWorker, board.boardFENFormat]);
 };
 
 export default useStockfish;
