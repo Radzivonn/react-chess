@@ -1,0 +1,29 @@
+.settings-popup {
+  width: 400px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+  background-color: var(--cell-light-color);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.settings__option-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings__option {
+  display: flex;
+  flex-direction: column;
+}
+
+.option__name {
+  font-size: xx-large;
+  font-weight: 500;
+  color: var(--main-color-3);
+}
