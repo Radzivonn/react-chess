@@ -3,7 +3,7 @@ import CellsBlock from './CellsBlock';
 import DummyCellsBlock from './DummyCellsBlock';
 import { Board } from 'models/Board';
 import { Cell } from 'models/Cell';
-import { useMoveListStore } from 'store/moveListStore';
+import { useMoveListStore } from 'store/useMoveList';
 
 interface Props {
   board: Board;

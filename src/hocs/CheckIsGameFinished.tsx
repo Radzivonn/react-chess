@@ -1,4 +1,4 @@
-import { useGameStateStore } from 'store/gameSettingsStore';
+import { useGameStateStore } from 'store/useGameState';
 import { FinishGameMessage } from 'components/FinishGameMessage';
 
 export const CheckIsGameFinished = () => {

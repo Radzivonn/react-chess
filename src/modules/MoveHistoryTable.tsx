@@ -1,4 +1,4 @@
-import { useMoveListStore } from 'store/moveListStore';
+import { useMoveListStore } from 'store/useMoveList';
 
 const MoveHistoryTable = () => {
   const { moveList, selectedMoveIndex, setSelectedMoveIndex } = useMoveListStore();

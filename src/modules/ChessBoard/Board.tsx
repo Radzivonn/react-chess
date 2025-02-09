@@ -6,8 +6,8 @@ import { Pawn } from 'models/figures/Pawn';
 import CapturedFigures from './components/CapturedFigures';
 import Cells from './components/Cells';
 import BoardLineSymbols from './components/BoardLineSymbols';
-import { useGameStateStore } from 'store/gameSettingsStore';
-import { useMoveListStore } from 'store/moveListStore';
+import { useGameStateStore } from 'store/useGameState';
+import { useMoveListStore } from 'store/useMoveList';
 import evaluate from 'helpers/materialEvaluation';
 import useStockfish from 'hooks/stockfish/useStockfish';
 import { Board } from 'models/Board';
@@ -31,7 +31,7 @@ const BoardModule: FC<Props> = ({ board }) => {
   } = useGameStateStore();
   const { setMoveList, selectedMoveIndex, setSelectedMoveIndex } = useMoveListStore();
 
-  console.log('rerender BOARD');
+  // console.log('rerender BOARD');
 
   const moveFigure = (currentCell: Cell, targetCell: Cell, promotedFigure?: FENChar) => {
     const newBoard = board.moveFigure(currentCell, targetCell, promotedFigure);

@@ -1,4 +1,4 @@
-import { useGameStateStore } from 'store/gameSettingsStore';
+import { useGameStateStore } from 'store/useGameState';
 import BoardModule from 'modules/ChessBoard/Board';
 
 export const ChessBoard = () => {

@@ -1,4 +1,4 @@
-import { useGameStateStore } from 'store/gameSettingsStore';
+import { useGameStateStore } from 'store/useGameState';
 
 const EvaluationBar = () => {
   const evaluation = useGameStateStore((state) => state.evaluation);
