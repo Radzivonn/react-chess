@@ -11,6 +11,7 @@ import { Board } from 'models/Board';
 import { Cell } from 'models/Cell';
 import useStockfishSettingsStore from 'store/useStockfishSettings';
 import useStockfishWorkerStore from 'store/useStockfishWorker';
+import { checkIsMobile } from './helpers/CheckDevice';
 
 type UseStockfishHook = (
   board: Board,
@@ -55,8 +56,10 @@ const useStockfish: UseStockfishHook = (board, moveFigure) => {
   };
 
   useEffect(() => {
+    const pathToEngine = checkIsMobile() ? '/stockfish-16.1-lite.js' : '/stockfish-16.1.js';
+
     setStockfishWorker(
-      new Worker(new URL('/stockfish-16.1.js', import.meta.url), {
+      new Worker(new URL(pathToEngine, import.meta.url), {
         type: 'module',
       }),
     );
@@ -84,7 +87,7 @@ const useStockfish: UseStockfishHook = (board, moveFigure) => {
           setEvaluation(getEvaluationPercentage(message, currentPlayer));
         } else if (message.startsWith('bestmove')) {
           const bestMove = getBestMove(message);
-          console.log('Best move:', bestMove);
+          // console.log('Best move:', bestMove);
           if (bestMove) engineMoveFigure(bestMove);
         }
       };
