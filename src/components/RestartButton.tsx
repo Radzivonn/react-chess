@@ -36,7 +36,7 @@ export const RestartButton = () => {
 
   return (
     <button className="button--icon relative z-[500]" onClick={() => restart()}>
-      <img width="54" height="54" color="red" src="/public/reload.svg" alt="restart" />
+      <img width="54" height="54" color="red" src="/reload.svg" alt="restart" />
     </button>
   );
 };

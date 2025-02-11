@@ -36,18 +36,18 @@ export const figureCosts: Readonly<Record<FENChar, FigureCost>> = {
 };
 
 export const figureImagePaths: Readonly<Record<FENChar, string>> = {
-  [FENChar.WhitePawn]: '/public/white-pawn.svg',
-  [FENChar.WhiteKnight]: '/public/white-knight.svg',
-  [FENChar.WhiteBishop]: '/public/white-bishop.svg',
-  [FENChar.WhiteRook]: '/public/white-rook.svg',
-  [FENChar.WhiteQueen]: '/public/white-queen.svg',
-  [FENChar.WhiteKing]: '/public/white-king.svg',
-  [FENChar.BlackPawn]: '/public/black-pawn.svg',
-  [FENChar.BlackKnight]: '/public/black-knight.svg',
-  [FENChar.BlackBishop]: '/public/black-bishop.svg',
-  [FENChar.BlackRook]: '/public/black-rook.svg',
-  [FENChar.BlackQueen]: '/public/black-queen.svg',
-  [FENChar.BlackKing]: '/public/black-king.svg',
+  [FENChar.WhitePawn]: '/white-pawn.svg',
+  [FENChar.WhiteKnight]: '/white-knight.svg',
+  [FENChar.WhiteBishop]: '/white-bishop.svg',
+  [FENChar.WhiteRook]: '/white-rook.svg',
+  [FENChar.WhiteQueen]: '/white-queen.svg',
+  [FENChar.WhiteKing]: '/white-king.svg',
+  [FENChar.BlackPawn]: '/black-pawn.svg',
+  [FENChar.BlackKnight]: '/black-knight.svg',
+  [FENChar.BlackBishop]: '/black-bishop.svg',
+  [FENChar.BlackRook]: '/black-rook.svg',
+  [FENChar.BlackQueen]: '/black-queen.svg',
+  [FENChar.BlackKing]: '/black-king.svg',
 };
 
 export const enum MoveType {
