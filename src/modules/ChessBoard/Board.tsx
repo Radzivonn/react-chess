@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { Cell } from 'models/Cell';
-import { Colors, FENChar } from 'types/enums';
+import { FENChar } from 'types/enums';
 import { PromotionFigureDialog } from './components/PromotionFigureDialog';
 import { Pawn } from 'models/figures/Pawn';
 import CapturedFigures from './components/CapturedFigures';
@@ -31,8 +31,6 @@ const BoardModule: FC<Props> = ({ board }) => {
   } = useGameStateStore();
   const { setMoveList, selectedMoveIndex, setSelectedMoveIndex } = useMoveListStore();
 
-  // console.log('rerender BOARD');
-
   const moveFigure = (currentCell: Cell, targetCell: Cell, promotedFigure?: FENChar) => {
     const newBoard = board.moveFigure(currentCell, targetCell, promotedFigure);
     setGameOverMessage(newBoard.gameOverMessage);
@@ -62,8 +60,7 @@ const BoardModule: FC<Props> = ({ board }) => {
   };
 
   const clickOnFigure = (cell: Cell) => {
-    // !!! checking currentPlayer === Colors.WHITE TEMPORARY to test engine
-    if (currentPlayer === Colors.WHITE) {
+    if (currentPlayer === board.boardOrientation) {
       if (selectedCell && selectedCell !== cell && cell.available) {
         moveAction(selectedCell, cell);
       } else if (cell.figure?.color === currentPlayer) {
@@ -73,7 +70,6 @@ const BoardModule: FC<Props> = ({ board }) => {
     }
   };
 
-  // ! refactor
   const highlightCells = () => {
     if (selectedCell) {
       board.highlightCells(selectedCell);

@@ -1,14 +1,18 @@
 import { useGameStateStore } from 'store/useGameState';
 
+const mobileBreakPoint = 992;
+
 const EvaluationBar = () => {
   const evaluation = useGameStateStore((state) => state.evaluation);
+  const board = useGameStateStore((state) => state.board);
+  const isMobileResolution = window.innerWidth < mobileBreakPoint;
 
   return (
-    <div className={`evaluation-bar`}>
+    <div className={`evaluation__bar--${board?.boardOrientation}`}>
       <div
-        className="white-bar"
+        className="bar"
         style={{
-          transform: `scaleY(${evaluation})`,
+          transform: `${isMobileResolution ? 'scaleX' : 'scaleY'}(${evaluation})`,
         }}
       ></div>
     </div>

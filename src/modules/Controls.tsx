@@ -1,5 +1,5 @@
 import { SettingsButton } from 'components/SettingsButton';
-import { RestartButton } from 'components/RestartButton';
+import { RestartButton } from 'components/RestartButton/RestartButton';
 
 const Controls = () => {
   return (

@@ -21,8 +21,8 @@ export const PromotionFigureDialog: FC<Props> = ({
   };
 
   return (
-    <div className="promotion-dialog-bg">
-      <div className="promotion-dialog">
+    <div className="dialog-bg">
+      <div className="dialog">
         <img
           id={isBlack ? FENChar.BlackQueen : FENChar.WhiteQueen}
           onClick={(e) => selectFigure(e)}

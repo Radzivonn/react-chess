@@ -1,0 +1,79 @@
+// only for PC
+@media (hover: hover) {
+  ::-webkit-scrollbar {
+    @apply w-[6px] bg-[var(--main-color-3)];
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-md bg-[var(--accent-color-2-shadow-1)];
+  }
+}
+// only for PC
+
+@media (max-width: 992px) {
+  .game {
+    height: auto;
+    flex-direction: column;
+    align-items: center;
+    gap: 42px;
+  }
+
+  .controls {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .timer-block {
+    width: 90%;
+    flex-direction: row;
+  }
+
+  .timer {
+    width: 10%;
+  }
+
+  .evaluation__bar {
+    width: 85%;
+    height: 40px;
+    &--white .bar,
+    &--black .bar {
+      transform-origin: left;
+    }
+  }
+
+  .move-table {
+    width: 50%;
+  }
+}
+
+@media (max-width: 768px) {
+  .board {
+    transform: scale(0.75);
+  }
+}
+
+@media (max-width: 768px) {
+  .game {
+    gap: 36px;
+  }
+
+  .board {
+    transform: scale(0.75);
+  }
+  .move-table {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .game {
+    gap: 24px;
+    transform: scale(0.8);
+  }
+}
+
+@media (max-width: 390px) {
+  .board {
+    transform: scale(0.6);
+  }
+}

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Colors, FENChar } from 'types/enums';
+import { FENChar } from 'types/enums';
 import { useGameStateStore } from 'store/useGameState';
 import {
   getBestMove,
@@ -55,6 +55,7 @@ const useStockfish: UseStockfishHook = (board, moveFigure) => {
     );
   };
 
+  // Running the stockfish engine
   useEffect(() => {
     const pathToEngine = checkIsMobile() ? '/stockfish-16.1-lite.js' : '/stockfish-16.1.js';
 
@@ -71,6 +72,7 @@ const useStockfish: UseStockfishHook = (board, moveFigure) => {
     };
   }, []);
 
+  // Update stockfish settings
   useEffect(() => {
     if (settingsModified) {
       setupEngine();
@@ -78,6 +80,7 @@ const useStockfish: UseStockfishHook = (board, moveFigure) => {
     }
   }, [settingsModified]);
 
+  // Overriding the onmessage method when the moveFigure function changes
   useEffect(() => {
     if (stockfishWorker) {
       stockfishWorker.onmessage = (event) => {
@@ -94,20 +97,22 @@ const useStockfish: UseStockfishHook = (board, moveFigure) => {
     }
   }, [moveFigure]);
 
+  // Restart stockfish when the new game started
   useEffect(() => {
     if (!isGameStarted) {
       restartStockfish(board.boardFENFormat);
     }
   }, [isGameStarted]);
 
-  // getting best move after every move
+  // Getting best move
   useEffect(() => {
-    if (currentPlayer === Colors.WHITE) {
+    // if player's move
+    if (currentPlayer === board.boardOrientation) {
       sendCommandToStockfish('stop');
     } else if (stockfishWorker) {
       getBestStockfishMove(board.boardFENFormat, getItem('depth').value);
     }
-  }, [stockfishWorker, board.boardFENFormat]);
+  }, [stockfishWorker, board.boardFENFormat, board.boardOrientation]);
 };
 
 export default useStockfish;
