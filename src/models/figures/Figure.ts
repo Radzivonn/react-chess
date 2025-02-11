@@ -21,11 +21,6 @@ export class Figure {
     return true;
   }
 
-  // Method for check pawn attacks
-  isCellUnderAttack(target: Cell): boolean {
-    return false;
-  }
-
   moveFigure() {}
 
   clone() {

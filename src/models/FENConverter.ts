@@ -11,13 +11,20 @@ export class FENConverter {
     'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
   public convertBoardToFEN(
-    board: Cell[][],
+    originalBoard: Cell[][],
     playerColor: Colors,
+    boardOrientation: Colors,
     lastMove: LastMove | null,
     fiftyMoveRuleCounter: number,
     numberOfFullMoves: number,
   ): string {
     let FEN = '';
+
+    // if board orientation is black color, need to reverse rows and columns to get correct result
+    const board =
+      boardOrientation === Colors.WHITE
+        ? originalBoard
+        : originalBoard.toReversed().map((row) => row.toReversed());
 
     for (let i = 0; i <= 7; i++) {
       let FENRow = '';
@@ -53,7 +60,7 @@ export class FENConverter {
     const castlingPossibilities = (color: Colors): string => {
       let castlingAvailability = '';
 
-      const kingPositionY = color === Colors.WHITE ? 7 : 0;
+      const kingPositionY = color === Colors.WHITE ? 7 : 0; // !
       const king: Figure | null = board[kingPositionY][4].figure;
 
       if (king instanceof King && !king.hasMoved) {
@@ -81,7 +88,7 @@ export class FENConverter {
     const { figure, prevX, prevY } = lastMove;
 
     if (figure instanceof Pawn && Math.abs(figure.y - prevY) === 2) {
-      const row = color === Colors.WHITE ? 3 : 6;
+      const row = color === Colors.WHITE ? 3 : 6; // !
       return columns[prevX] + String(row);
     }
     return '-';

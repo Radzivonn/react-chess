@@ -19,8 +19,8 @@ export class Pawn extends Figure {
   canMove(board: Board, target: Cell): boolean {
     if (!super.canMove(board, target)) return false;
 
-    const direction: Direction = this.color === Colors.BLACK ? 1 : -1; // TODO temporary decision
-    const firstStepDirection: FirstStepDirection = this.color === Colors.BLACK ? 2 : -2;
+    const direction: Direction = this.getDirection(board.boardOrientation); // !!!!TODO temporary decision
+    const firstStepDirection: FirstStepDirection = this.color === board.boardOrientation ? -2 : 2;
 
     // if non-beating move
     if (target.x === this.x) {
@@ -41,8 +41,9 @@ export class Pawn extends Figure {
 
     // if beating move
     if (
-      (this.isCellUnderAttack(target) && board.getCell(this.x, this.y).isEnemy(target)) ||
-      this.canCaptureEnPassant(target, board.lastMove)
+      (this.isCellUnderAttack(target, board.boardOrientation) &&
+        board.getCell(this.x, this.y).isEnemy(target)) ||
+      this.canCaptureEnPassant(target, board.lastMove, this.getDirection(board.boardOrientation))
     ) {
       return true;
     }
@@ -50,8 +51,8 @@ export class Pawn extends Figure {
   }
 
   // The logic is placed in a separate function in order to use this function to calculate cells under attack
-  isCellUnderAttack(target: Cell): boolean {
-    const direction: Direction = this.color === Colors.BLACK ? 1 : -1; // TODO temporary decision
+  isCellUnderAttack(target: Cell, boardOrientation: Colors): boolean {
+    const direction: Direction = this.getDirection(boardOrientation); // TODO temporary decision
 
     if (target.y === this.y + direction && Math.abs(target.x - this.x) === 1) {
       return true;
@@ -59,11 +60,10 @@ export class Pawn extends Figure {
     return false;
   }
 
-  canCaptureEnPassant(target: Cell, lastMove: LastMove | null): boolean {
+  canCaptureEnPassant(target: Cell, lastMove: LastMove | null, direction: Direction): boolean {
     if (!lastMove) return false;
 
     const { figure, prevY } = lastMove;
-    const direction: Direction = this.color === Colors.BLACK ? 1 : -1;
 
     if (
       figure instanceof Pawn &&
@@ -79,9 +79,9 @@ export class Pawn extends Figure {
     return false;
   }
 
-  isEnPassantCapture(lastMove: LastMove): boolean {
+  isEnPassantCapture(lastMove: LastMove, boardOrientation: Colors): boolean {
     const { figure, prevY } = lastMove;
-    const direction: Direction = this.color === Colors.BLACK ? 1 : -1;
+    const direction: Direction = this.getDirection(boardOrientation);
 
     if (
       figure instanceof Pawn &&
@@ -106,4 +106,6 @@ export class Pawn extends Figure {
   clone() {
     return new Pawn(this.x, this.y, this.color, this.isFirstStep, this.id);
   }
+
+  private getDirection = (boardOrientation: Colors) => (this.color === boardOrientation ? -1 : 1);
 }

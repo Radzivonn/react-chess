@@ -11,7 +11,8 @@ const Timer: FC<Props> = ({ timeControls }) => {
   const [blackTime, setBlackTime] = useState(timeControls);
   const [whiteTime, setWhiteTime] = useState(timeControls);
   const timer = useRef<null | ReturnType<typeof setInterval>>(null);
-  const { isGameStarted, currentPlayer, gameOverMessage, setGameOverMessage } = useGameStateStore();
+  const { isGameStarted, board, currentPlayer, gameOverMessage, setGameOverMessage } =
+    useGameStateStore();
   const isStopped = !!gameOverMessage || !isGameStarted;
 
   useEffect(() => {
@@ -55,8 +56,12 @@ const Timer: FC<Props> = ({ timeControls }) => {
 
   return (
     <div className="timer-block">
-      <h2 className="timer">{convertTime(blackTime)}</h2>
-      <h2 className="timer">{convertTime(whiteTime)}</h2>
+      <h2 className="timer">
+        {board?.boardOrientation === Colors.WHITE ? convertTime(blackTime) : convertTime(whiteTime)}
+      </h2>
+      <h2 className="timer">
+        {board?.boardOrientation === Colors.WHITE ? convertTime(whiteTime) : convertTime(blackTime)}
+      </h2>
     </div>
   );
 };

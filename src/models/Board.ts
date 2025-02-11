@@ -18,14 +18,7 @@ export class Board {
   private boardAsFEN: string = FENConverter.initialPosition;
   private FENConverter = new FENConverter();
 
-  readonly boardOrientation: Colors = Colors.WHITE; // * temporary readonly
-  readonly ROWS_NUMBERS =
-    this.boardOrientation === Colors.WHITE
-      ? ['8', '7', '6', '5', '4', '3', '2', '1']
-      : ['1', '2', '3', '4', '5', '6', '7', '8'];
-  readonly COLUMNS_LETTERS =
-    this.boardOrientation === Colors.WHITE ? columns : columns.toReversed();
-
+  boardOrientation: Colors = Colors.WHITE;
   currentPlayerColor = Colors.WHITE;
   checkState = false;
   cells: Cell[][] = [];
@@ -48,7 +41,22 @@ export class Board {
     return this.boardAsFEN;
   }
 
-  public restartGame(): void {
+  public get playerColor(): Colors {
+    return this.boardOrientation;
+  }
+
+  public get ROWS_NUMBERS(): string[] {
+    return this.boardOrientation === Colors.WHITE
+      ? ['8', '7', '6', '5', '4', '3', '2', '1']
+      : ['1', '2', '3', '4', '5', '6', '7', '8'];
+  }
+
+  public get COLUMNS_LETTERS(): string[] {
+    return this.boardOrientation === Colors.WHITE ? columns : columns.toReversed();
+  }
+
+  public restartGame(boardOrientation?: Colors): void {
+    this.boardOrientation = boardOrientation ? boardOrientation : this.boardOrientation;
     this.initCells();
     this.addFigures();
     this.gameHistory.push({
@@ -231,7 +239,6 @@ export class Board {
 
   isInCheck(opponentFigures: Figure[]): boolean {
     for (const figure of opponentFigures) {
-      const isPawn = figure instanceof Pawn;
       for (let y = 0; y < this.cells.length; y++) {
         const row = this.cells[y];
         for (let x = 0; x < row.length; x++) {
@@ -239,9 +246,13 @@ export class Board {
           const isKingTarget =
             target.figure?.color !== figure.color && target.figure instanceof King;
 
-          if (isKingTarget && isPawn && figure.isCellUnderAttack(target)) {
+          if (
+            isKingTarget &&
+            figure instanceof Pawn &&
+            figure.isCellUnderAttack(target, this.boardOrientation)
+          ) {
             return true;
-          } else if (isKingTarget && !isPawn && figure.canMove(this, target)) {
+          } else if (isKingTarget && !(figure instanceof Pawn) && figure.canMove(this, target)) {
             return true;
           }
         }
@@ -402,7 +413,7 @@ export class Board {
     if (
       this.lastMove &&
       currentFigure instanceof Pawn &&
-      currentFigure.isEnPassantCapture(this.lastMove)
+      currentFigure.isEnPassantCapture(this.lastMove, this.boardOrientation)
     ) {
       const capturedPawnCell = this.getCell(this.lastMove.figure.x, this.lastMove.figure.y);
       if (capturedPawnCell.figure) {
@@ -435,6 +446,7 @@ export class Board {
     this.boardAsFEN = this.FENConverter.convertBoardToFEN(
       this.cells,
       nextPlayerColor,
+      this.boardOrientation,
       this.lastMove,
       this.fiftyMoveRuleCounter,
       this.fullNumberOfMoves,
@@ -608,79 +620,128 @@ export class Board {
 
   private addPawns() {
     for (let i = 0; i < 8; i++) {
-      const blackPawn = new Pawn(i, 1, Colors.BLACK, true);
-      this.cells[1][i].figure = blackPawn;
-      this.blackFigures.push(blackPawn.clone());
+      const playerPawn = new Pawn(i, 6, this.playerColor, true);
+      this.cells[6][i].figure = playerPawn;
+      if (this.playerColor === Colors.WHITE) this.whiteFigures.push(playerPawn.clone());
+      else this.blackFigures.push(playerPawn.clone());
 
-      const whitePawn = new Pawn(i, 6, Colors.WHITE, true);
-      this.cells[6][i].figure = whitePawn;
-      this.whiteFigures.push(whitePawn.clone());
+      const anotherColor = this.playerColor === Colors.WHITE ? Colors.BLACK : Colors.WHITE;
+
+      const anotherPawn = new Pawn(i, 1, anotherColor, true);
+      this.cells[1][i].figure = anotherPawn;
+      if (anotherColor === Colors.WHITE) this.whiteFigures.push(anotherPawn.clone());
+      else this.blackFigures.push(anotherPawn.clone());
     }
   }
 
   private addKings() {
-    const blackKing = new King(4, 0, Colors.BLACK, false);
-    const whiteKing = new King(4, 7, Colors.WHITE, false);
+    const playerKing = new King(4, 7, this.playerColor, false);
+    const anotherKing = new King(
+      4,
+      0,
+      this.playerColor === Colors.WHITE ? Colors.BLACK : Colors.WHITE,
+      false,
+    );
 
-    this.cells[0][4].figure = blackKing;
-    this.cells[7][4].figure = whiteKing;
-    this.blackFigures.push(blackKing.clone());
-    this.whiteFigures.push(whiteKing.clone());
+    this.cells[7][4].figure = playerKing;
+    this.cells[0][4].figure = anotherKing;
+
+    if (this.playerColor === Colors.WHITE) {
+      this.whiteFigures.push(playerKing.clone());
+      this.blackFigures.push(anotherKing.clone());
+    } else {
+      this.blackFigures.push(playerKing.clone());
+      this.whiteFigures.push(anotherKing.clone());
+    }
   }
 
   private addQueens() {
-    const blackQueen = new Queen(3, 0, Colors.BLACK);
-    const whiteQueen = new Queen(3, 7, Colors.WHITE);
+    const playerQueen = new Queen(3, 7, this.playerColor);
+    const anotherQueen = new Queen(
+      3,
+      0,
+      this.playerColor === Colors.WHITE ? Colors.BLACK : Colors.WHITE,
+    );
 
-    this.cells[0][3].figure = blackQueen;
-    this.cells[7][3].figure = whiteQueen;
-    this.blackFigures.push(blackQueen.clone());
-    this.whiteFigures.push(whiteQueen.clone());
+    this.cells[7][3].figure = playerQueen;
+    this.cells[0][3].figure = anotherQueen;
+
+    if (this.playerColor === Colors.WHITE) {
+      this.whiteFigures.push(playerQueen.clone());
+      this.blackFigures.push(anotherQueen.clone());
+    } else {
+      this.blackFigures.push(playerQueen.clone());
+      this.whiteFigures.push(anotherQueen.clone());
+    }
   }
 
   private addBishops() {
-    const blackBishop = new Bishop(2, 0, Colors.BLACK);
-    const blackBishop2 = new Bishop(5, 0, Colors.BLACK);
-    const whiteBishop = new Bishop(2, 7, Colors.WHITE);
-    const whiteBishop2 = new Bishop(5, 7, Colors.WHITE);
+    const playerBishop = new Bishop(2, 7, this.playerColor);
+    const playerBishop2 = new Bishop(5, 7, this.playerColor);
 
-    this.cells[0][2].figure = blackBishop;
-    this.cells[0][5].figure = blackBishop2;
-    this.cells[7][2].figure = whiteBishop;
-    this.cells[7][5].figure = whiteBishop2;
+    const anotherColor = this.playerColor === Colors.WHITE ? Colors.BLACK : Colors.WHITE;
 
-    this.blackFigures.push(blackBishop.clone(), blackBishop2.clone());
-    this.whiteFigures.push(whiteBishop.clone(), whiteBishop2.clone());
+    const anotherBishop = new Bishop(2, 0, anotherColor);
+    const anotherBishop2 = new Bishop(5, 0, anotherColor);
+
+    this.cells[7][2].figure = playerBishop;
+    this.cells[7][5].figure = playerBishop2;
+    this.cells[0][2].figure = anotherBishop;
+    this.cells[0][5].figure = anotherBishop2;
+
+    if (this.playerColor === Colors.WHITE) {
+      this.whiteFigures.push(playerBishop.clone(), playerBishop2.clone());
+      this.blackFigures.push(anotherBishop.clone(), anotherBishop2.clone());
+    } else {
+      this.blackFigures.push(playerBishop.clone(), playerBishop2.clone());
+      this.whiteFigures.push(anotherBishop.clone(), anotherBishop2.clone());
+    }
   }
 
   private addKnights() {
-    const blackKnight = new Knight(1, 0, Colors.BLACK);
-    const blackKnight2 = new Knight(6, 0, Colors.BLACK);
-    const whiteKnight = new Knight(1, 7, Colors.WHITE);
-    const whiteKnight2 = new Knight(6, 7, Colors.WHITE);
+    const playerKnight = new Knight(1, 7, this.playerColor);
+    const playerKnight2 = new Knight(6, 7, this.playerColor);
 
-    this.cells[0][1].figure = blackKnight;
-    this.cells[0][6].figure = blackKnight2;
-    this.cells[7][1].figure = whiteKnight;
-    this.cells[7][6].figure = whiteKnight2;
+    const anotherColor = this.playerColor === Colors.WHITE ? Colors.BLACK : Colors.WHITE;
 
-    this.blackFigures.push(blackKnight.clone(), blackKnight2.clone());
-    this.whiteFigures.push(whiteKnight.clone(), whiteKnight2.clone());
+    const anotherKnight = new Knight(1, 0, anotherColor);
+    const anotherKnight2 = new Knight(6, 0, anotherColor);
+
+    this.cells[7][1].figure = playerKnight;
+    this.cells[7][6].figure = playerKnight2;
+    this.cells[0][1].figure = anotherKnight;
+    this.cells[0][6].figure = anotherKnight2;
+
+    if (this.playerColor === Colors.WHITE) {
+      this.whiteFigures.push(playerKnight.clone(), playerKnight2.clone());
+      this.blackFigures.push(anotherKnight.clone(), anotherKnight2.clone());
+    } else {
+      this.blackFigures.push(playerKnight.clone(), playerKnight2.clone());
+      this.whiteFigures.push(anotherKnight.clone(), anotherKnight2.clone());
+    }
   }
 
   private addRooks() {
-    const blackRook = new Rook(0, 0, Colors.BLACK, false);
-    const blackRook2 = new Rook(7, 0, Colors.BLACK, false);
-    const whiteRook = new Rook(0, 7, Colors.WHITE, false);
-    const whiteRook2 = new Rook(7, 7, Colors.WHITE, false);
+    const playerRook = new Rook(0, 7, this.playerColor, false);
+    const playerRook2 = new Rook(7, 7, this.playerColor, false);
 
-    this.cells[0][0].figure = blackRook;
-    this.cells[0][7].figure = blackRook2;
-    this.cells[7][0].figure = whiteRook;
-    this.cells[7][7].figure = whiteRook2;
+    const anotherColor = this.playerColor === Colors.WHITE ? Colors.BLACK : Colors.WHITE;
 
-    this.blackFigures.push(blackRook.clone(), blackRook2.clone());
-    this.whiteFigures.push(whiteRook.clone(), whiteRook2.clone());
+    const anotherRook = new Rook(0, 0, anotherColor, false);
+    const anotherRook2 = new Rook(7, 0, anotherColor, false);
+
+    this.cells[7][0].figure = playerRook;
+    this.cells[7][7].figure = playerRook2;
+    this.cells[0][0].figure = anotherRook;
+    this.cells[0][7].figure = anotherRook2;
+
+    if (this.playerColor === Colors.WHITE) {
+      this.whiteFigures.push(playerRook.clone(), playerRook2.clone());
+      this.blackFigures.push(anotherRook.clone(), anotherRook2.clone());
+    } else {
+      this.blackFigures.push(playerRook.clone(), playerRook2.clone());
+      this.whiteFigures.push(anotherRook.clone(), anotherRook2.clone());
+    }
   }
 
   private addFigures() {
