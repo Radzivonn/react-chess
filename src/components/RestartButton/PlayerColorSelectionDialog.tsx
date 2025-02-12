@@ -1,5 +1,6 @@
 import React, { FC, MouseEvent } from 'react';
 import { Colors, FENChar, figureImagePaths } from 'types/enums';
+import Dialog from 'components/Dialog';
 
 interface Props {
   setIsDialogActive: (isDialogActive: boolean) => void;
@@ -13,23 +14,21 @@ const PlayerColorSelectionDialog: FC<Props> = ({ selectColor, setIsDialogActive 
   };
 
   return (
-    <div className="dialog-bg">
-      <div className="dialog">
-        <img
-          id={FENChar.WhiteKing}
-          onClick={(e) => onSelect(e)}
-          src={figureImagePaths[FENChar.WhiteKing]}
-          alt="figure"
-        />
-        <img
-          id={FENChar.BlackKing}
-          onClick={(e) => onSelect(e)}
-          src={figureImagePaths[FENChar.BlackKing]}
-          alt="figure"
-        />
-        <div id="cross" onClick={() => setIsDialogActive(false)}></div>
-      </div>
-    </div>
+    <Dialog>
+      <img
+        id={FENChar.WhiteKing}
+        onClick={(e) => onSelect(e)}
+        src={figureImagePaths[FENChar.WhiteKing]}
+        alt="figure"
+      />
+      <img
+        id={FENChar.BlackKing}
+        onClick={(e) => onSelect(e)}
+        src={figureImagePaths[FENChar.BlackKing]}
+        alt="figure"
+      />
+      <div id="cross" onClick={() => setIsDialogActive(false)}></div>
+    </Dialog>
   );
 };
 

@@ -7,7 +7,7 @@ interface DummyCellsModuleProps {
   boardState: boardFENCharState;
 }
 
-// This is a component to display the state of the board on previous moves
+// This is a component to display the state of the board on previous moves without interactivity
 const DummyCellsBlock: FC<DummyCellsModuleProps> = ({ boardState }) => {
   return (
     <div className="cells-block">
