@@ -11,13 +11,13 @@ import { Rook } from './figures/Rook';
 import { Figure } from './figures/Figure';
 
 export class Board {
-  private fullNumberOfMoves: number = 0;
   private fiftyMoveRuleCounter: number = 0;
   private threeFoldRepetitionDictionary = new Map<string, number>();
   private threeFoldRepetitionFlag: boolean = false;
   private boardAsFEN: string = FENConverter.initialPosition;
   private FENConverter = new FENConverter();
 
+  fullNumberOfMoves: number = 0;
   boardOrientation: Colors = Colors.WHITE;
   currentPlayerColor = Colors.WHITE;
   checkState = false;
@@ -443,16 +443,6 @@ export class Board {
         : Colors.BLACK
       : this.currentPlayerColor;
 
-    this.boardAsFEN = this.FENConverter.convertBoardToFEN(
-      this.cells,
-      nextPlayerColor,
-      this.boardOrientation,
-      this.lastMove,
-      this.fiftyMoveRuleCounter,
-      this.fullNumberOfMoves,
-    );
-    this.updateThreeFoldRepetitionDictionary(this.boardAsFEN);
-
     const opponentFigures =
       nextPlayerColor === Colors.BLACK ? this.whiteFigures : this.blackFigures;
 
@@ -468,7 +458,9 @@ export class Board {
       ...lastMoveTemp,
       moveType,
     };
+    this.boardAsFEN = this.FENConverter.convertBoardToFEN(this, this.fiftyMoveRuleCounter);
 
+    this.updateThreeFoldRepetitionDictionary(this.boardAsFEN);
     this.storeMove(startFigureCoord, promotedFigure);
     this.updateGameHistory();
     this.resetCellAvailabilityFlags();

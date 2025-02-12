@@ -1,30 +1,24 @@
 import { Colors } from 'types/enums';
-import { columns, LastMove } from 'types/types';
+import { LastMove } from 'types/types';
 import { Figure } from './figures/Figure';
 import { King } from './figures/King';
 import { Rook } from './figures/Rook';
 import { Pawn } from './figures/Pawn';
 import { Cell } from './Cell';
+import { Board } from 'models/Board';
 
 export class FENConverter {
   public static readonly initialPosition: string =
     'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-  public convertBoardToFEN(
-    originalBoard: Cell[][],
-    playerColor: Colors,
-    boardOrientation: Colors,
-    lastMove: LastMove | null,
-    fiftyMoveRuleCounter: number,
-    numberOfFullMoves: number,
-  ): string {
+  public convertBoardToFEN(originalBoard: Board, fiftyMoveRuleCounter: number): string {
     let FEN = '';
 
     // if board orientation is black color, need to reverse rows and columns to get correct result
     const board =
-      boardOrientation === Colors.WHITE
-        ? originalBoard
-        : originalBoard.toReversed().map((row) => row.toReversed());
+      originalBoard.boardOrientation === Colors.WHITE
+        ? originalBoard.cells
+        : originalBoard.cells.toReversed().map((row) => row.toReversed());
 
     for (let i = 0; i <= 7; i++) {
       let FENRow = '';
@@ -47,20 +41,28 @@ export class FENConverter {
       FEN += i === 7 ? FENRow : FENRow + '/';
     }
 
-    const player = playerColor === Colors.WHITE ? 'w' : 'b';
+    const player = originalBoard.currentPlayerColor === Colors.WHITE ? 'w' : 'b';
     FEN += ' ' + player;
-    FEN += ' ' + this.castlingAvailability(board);
-    FEN += ' ' + this.enPassantPosibility(lastMove, playerColor);
+    FEN += ' ' + this.castlingAvailability(originalBoard.cells, originalBoard.boardOrientation);
+    FEN +=
+      ' ' +
+      this.enPassantPossibility(
+        originalBoard.lastMove,
+        originalBoard.currentPlayerColor,
+        originalBoard.boardOrientation,
+        originalBoard.COLUMNS_LETTERS,
+        originalBoard.ROWS_NUMBERS,
+      );
     FEN += ' ' + fiftyMoveRuleCounter * 2;
-    FEN += ' ' + numberOfFullMoves;
+    FEN += ' ' + originalBoard.fullNumberOfMoves;
     return FEN;
   }
 
-  private castlingAvailability(board: Cell[][]): string {
-    const castlingPossibilities = (color: Colors): string => {
+  private castlingAvailability(board: Cell[][], boardOrientation: Colors): string {
+    const castlingPossibilities = (color: Colors, boardOrientation: Colors): string => {
       let castlingAvailability = '';
 
-      const kingPositionY = color === Colors.WHITE ? 7 : 0; // !
+      const kingPositionY = color === boardOrientation ? 7 : 0;
       const king: Figure | null = board[kingPositionY][4].figure;
 
       if (king instanceof King && !king.hasMoved) {
@@ -79,17 +81,26 @@ export class FENConverter {
     };
 
     const castlingAvailability =
-      castlingPossibilities(Colors.WHITE) + castlingPossibilities(Colors.BLACK);
+      castlingPossibilities(Colors.WHITE, boardOrientation) +
+      castlingPossibilities(Colors.BLACK, boardOrientation);
     return castlingAvailability !== '' ? castlingAvailability : '-';
   }
 
-  private enPassantPosibility(lastMove: LastMove | null, color: Colors): string {
+  private enPassantPossibility(
+    lastMove: LastMove | null,
+    color: Colors,
+    boardOrientation: Colors,
+    columns: string[],
+    rows: string[],
+  ): string {
+    console.log('last ', lastMove);
+
     if (!lastMove) return '-';
     const { figure, prevX, prevY } = lastMove;
 
     if (figure instanceof Pawn && Math.abs(figure.y - prevY) === 2) {
-      const row = color === Colors.WHITE ? 3 : 6; // !
-      return columns[prevX] + String(row);
+      const row = color === boardOrientation ? 3 : 6;
+      return columns[prevX] + String(rows[row - 1]);
     }
     return '-';
   }
